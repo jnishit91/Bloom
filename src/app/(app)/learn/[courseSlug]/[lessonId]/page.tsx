@@ -118,8 +118,13 @@ export default async function LessonPage({ params }: PageProps) {
             initialPosition={progress?.last_position_seconds || 0}
           />
 
-          {/* AI assistant bar (placeholder) */}
-          <AiBar />
+          {/* AI assistant bar */}
+          <AiBar
+            lessonId={lessonId}
+            lessonTitle={lesson.title}
+            moduleTitle={lesson.module.title}
+            courseTitle={lesson.module.course.title}
+          />
 
           {/* Description */}
           {lesson.description && (

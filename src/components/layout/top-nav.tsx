@@ -5,9 +5,9 @@ import { ProfileMenu } from "./profile-menu";
 import {
   Search,
   Bell,
-  Sparkles,
   Menu,
 } from "lucide-react";
+import { BloomAiButton } from "./bloom-ai-button";
 import { Button } from "@/components/ui/button";
 
 export async function TopNav() {
@@ -52,14 +52,7 @@ export async function TopNav() {
             <span className="sr-only">Notifications</span>
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hidden sm:inline-flex gap-1.5 text-bloom-rose hover:text-bloom-rose-dark hover:bg-bloom-rose/10"
-          >
-            <Sparkles className="size-4" />
-            Bloom AI
-          </Button>
+          <BloomAiButton />
 
           {user && profile ? (
             <ProfileMenu

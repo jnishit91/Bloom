@@ -1,0 +1,402 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import {
+  streamChat,
+  chatCompletion,
+  repairQuizJson,
+  buildLessonSystemPrompt,
+  buildSummarizePrompt,
+  buildQuizPrompt,
+  buildGlobalSystemPrompt,
+  type ChatMessage,
+} from "@/lib/ai";
+
+interface RequestBody {
+  mode: "chat" | "summarize" | "quiz";
+  message?: string;
+  lessonId?: string;
+  conversationId?: string;
+}
+
+export async function POST(req: NextRequest) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body: RequestBody = await req.json();
+  const { mode, message, lessonId, conversationId } = body;
+
+  if (!mode || !["chat", "summarize", "quiz"].includes(mode)) {
+    return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
+  }
+
+  try {
+    // Build context based on whether we have a lesson
+    let systemPrompt: string;
+
+    if (lessonId) {
+      // Lesson-scoped AI
+      const { data: lesson } = await supabase
+        .from("lessons")
+        .select("id, title, description, transcript, module_id")
+        .eq("id", lessonId)
+        .single();
+
+      if (!lesson) {
+        return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+      }
+
+      const { data: module } = await supabase
+        .from("modules")
+        .select("id, title, course_id")
+        .eq("id", lesson.module_id)
+        .single();
+
+      const { data: course } = module
+        ? await supabase
+            .from("courses")
+            .select("id, title")
+            .eq("id", module.course_id)
+            .single()
+        : { data: null };
+
+      systemPrompt = buildLessonSystemPrompt(
+        lesson.title,
+        module?.title || "Unknown Module",
+        course?.title || "Unknown Course",
+        lesson.transcript,
+        lesson.description,
+      );
+    } else {
+      // Global Bloom AI
+      const { data: enrollments } = await supabase
+        .from("enrollments")
+        .select("course_id")
+        .eq("user_id", user.id)
+        .in("status", ["active", "manual"]);
+
+      let courseNames: string[] = [];
+      if (enrollments && enrollments.length > 0) {
+        const { data: courses } = await supabase
+          .from("courses")
+          .select("title")
+          .in(
+            "id",
+            enrollments.map((e) => e.course_id),
+          );
+        courseNames = (courses || []).map((c) => c.title);
+      }
+
+      systemPrompt = buildGlobalSystemPrompt(courseNames);
+    }
+
+    // ── Quiz mode: non-streaming JSON ──
+    if (mode === "quiz") {
+      return await handleQuiz(supabase, user.id, lessonId, systemPrompt);
+    }
+
+    // ── Summarize mode ──
+    if (mode === "summarize") {
+      return await handleStream(
+        [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: buildSummarizePrompt() },
+        ],
+        1000,
+        0.3,
+        req.signal,
+      );
+    }
+
+    // ── Chat mode ──
+    if (!message?.trim()) {
+      return NextResponse.json({ error: "Message required" }, { status: 400 });
+    }
+
+    // Load conversation history if continuing
+    let history: ChatMessage[] = [];
+    if (conversationId) {
+      const { data: conv } = await supabase
+        .from("ai_conversations")
+        .select("messages")
+        .eq("id", conversationId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (conv?.messages && Array.isArray(conv.messages)) {
+        history = conv.messages as ChatMessage[];
+      }
+    }
+
+    // Build messages array
+    const messages: ChatMessage[] = [
+      { role: "system", content: systemPrompt },
+      ...history,
+      { role: "user", content: message },
+    ];
+
+    // Stream response and save conversation
+    return await handleChatStream(
+      supabase,
+      user.id,
+      lessonId || null,
+      conversationId || null,
+      messages,
+      history,
+      message,
+      req.signal,
+    );
+  } catch (err) {
+    console.error("AI chat error:", err);
+    const errorMessage =
+      err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  }
+}
+
+async function handleQuiz(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  lessonId: string | undefined,
+  systemPrompt: string,
+) {
+  const messages: ChatMessage[] = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: buildQuizPrompt() },
+  ];
+
+  // Try up to 2 times
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const raw = await chatCompletion({
+      messages,
+      maxTokens: 2000,
+      temperature: 0.2,
+    });
+
+    const questions = repairQuizJson(raw);
+    if (questions && questions.length >= 3) {
+      // Validate structure
+      const valid = questions.every(
+        (q: unknown) =>
+          typeof q === "object" &&
+          q !== null &&
+          "question" in q &&
+          "options" in q &&
+          "correct" in q &&
+          "explanation" in q &&
+          Array.isArray((q as { options: unknown }).options) &&
+          (q as { options: unknown[] }).options.length === 4,
+      );
+
+      if (valid) {
+        // Save quiz attempt shell (score filled in client-side)
+        if (lessonId) {
+          await supabase.from("quiz_attempts").insert({
+            user_id: userId,
+            lesson_id: lessonId,
+            questions,
+            answers: [],
+          });
+        }
+
+        return NextResponse.json({ questions: questions.slice(0, 5) });
+      }
+    }
+
+    // Retry with a nudge
+    if (attempt === 0) {
+      messages.push({
+        role: "assistant",
+        content: raw,
+      });
+      messages.push({
+        role: "user",
+        content:
+          "That wasn't valid JSON. Please respond with ONLY a JSON array of 5 question objects, nothing else.",
+      });
+    }
+  }
+
+  return NextResponse.json(
+    { error: "Failed to generate valid quiz. Please try again." },
+    { status: 422 },
+  );
+}
+
+async function handleStream(
+  messages: ChatMessage[],
+  maxTokens: number,
+  temperature: number,
+  signal: AbortSignal,
+) {
+  const upstream = await streamChat({
+    messages,
+    maxTokens,
+    temperature,
+    signal,
+  });
+
+  // Transform SSE stream to extract content deltas
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  const transform = new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      const text = decoder.decode(chunk, { stream: true });
+      const lines = text.split("\n");
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") {
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          continue;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ content })}\n\n`,
+              ),
+            );
+          }
+        } catch {
+          // Skip malformed chunks
+        }
+      }
+    },
+  });
+
+  const readable = upstream.pipeThrough(transform);
+
+  return new Response(readable, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
+}
+
+async function handleChatStream(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  lessonId: string | null,
+  conversationId: string | null,
+  messages: ChatMessage[],
+  history: ChatMessage[],
+  userMessage: string,
+  signal: AbortSignal,
+) {
+  const upstream = await streamChat({
+    messages,
+    maxTokens: 1500,
+    temperature: 0.7,
+    signal,
+  });
+
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  let fullResponse = "";
+
+  const transform = new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      const text = decoder.decode(chunk, { stream: true });
+      const lines = text.split("\n");
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") {
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          continue;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            fullResponse += content;
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ content })}\n\n`,
+              ),
+            );
+          }
+        } catch {
+          // Skip malformed chunks
+        }
+      }
+    },
+    async flush(controller) {
+      // Save conversation after stream completes
+      if (fullResponse) {
+        const updatedMessages: ChatMessage[] = [
+          ...history,
+          { role: "user", content: userMessage },
+          { role: "assistant", content: fullResponse },
+        ];
+
+        if (conversationId) {
+          await supabase
+            .from("ai_conversations")
+            .update({
+              messages: updatedMessages,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", conversationId)
+            .eq("user_id", userId);
+
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ conversationId })}\n\n`,
+            ),
+          );
+        } else {
+          // Create new conversation
+          const title =
+            userMessage.length > 60
+              ? userMessage.slice(0, 57) + "..."
+              : userMessage;
+
+          const { data: newConv } = await supabase
+            .from("ai_conversations")
+            .insert({
+              user_id: userId,
+              lesson_id: lessonId,
+              title,
+              messages: updatedMessages,
+            })
+            .select("id")
+            .single();
+
+          if (newConv) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ conversationId: newConv.id })}\n\n`,
+              ),
+            );
+          }
+        }
+      }
+    },
+  });
+
+  const readable = upstream.pipeThrough(transform);
+
+  return new Response(readable, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
+}

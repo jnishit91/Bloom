@@ -55,10 +55,30 @@
 
 ---
 
-## Phase 3: AI Layer — Pending
-- [ ] /api/ai/chat streaming endpoint with lesson-context injection
-- [ ] Summarize lesson, Quiz me (JSON + interactive panel), Chat slide-over
-- [ ] Global Bloom AI
+## Phase 3: AI Layer ✅
+
+### Done
+- [x] `src/lib/ai.ts` — AI client for OpenAI-compatible endpoints (Ollama, vLLM, etc.), transcript truncation (~6K tokens via middle-cut), JSON repair utility for quiz generation, system prompt builders for lesson-scoped and global modes
+- [x] `/api/ai/chat` streaming endpoint — single route handling 3 modes (chat, summarize, quiz), lesson-context injection, conversation persistence to ai_conversations table
+- [x] Summarize mode: structured summary streaming (Key Ideas, Action Step, Reflection Question), max_tokens 1000, temp 0.3
+- [x] Quiz mode: non-streaming JSON generation with strict validation, retry-once with nudge on malformed output, saves quiz_attempts
+- [x] Chat mode: streaming with conversation history, auto-creates/updates ai_conversations, sends conversationId back in stream
+- [x] AiProvider context: drawer state, lesson context, mode switching, initial message passthrough
+- [x] ChatDrawer slide-over: ~480px desktop, fullscreen mobile, dark botanical header, mode tabs, persistent disclaimer
+- [x] ChatMessages: user/assistant bubbles with avatars, streaming typing indicator (bouncing dots)
+- [x] ChatHistoryRail: past conversations list, new chat button, lesson-scoped filtering
+- [x] SummaryPanel: streaming structured summary with markdown heading/bullet rendering
+- [x] QuizPanel: interactive 5-question quiz (one card at a time, A-D option buttons, progress dots, correct=sage/wrong=bloom-rose, explanation reveal, final score screen, retry)
+- [x] AiBar wired: input submits to chat drawer, Summarize/Quiz/Chat pills open drawer in correct mode, lesson context auto-set on mount
+- [x] Global Bloom AI: top-nav button opens drawer without lesson context, knows enrolled courses
+- [x] Build compiles cleanly with zero TypeScript errors
+
+### Decisions Made
+- **Single `/api/ai/chat` route** handles all 3 modes — keeps API surface minimal
+- **Quiz uses non-streaming** completion + JSON repair (strip fences, fix trailing commas, close truncated arrays) — streaming JSON is unreliable with small models
+- **Conversation persistence** happens in the stream flush handler — no extra round-trip needed
+- **BloomAiButton** is a separate client component so top-nav remains a server component
+- **Slide-in animation** for drawer with prefers-reduced-motion respect
 
 ## Phase 4: Commerce — Pending
 - [ ] Public homepage, catalog, course sales page
