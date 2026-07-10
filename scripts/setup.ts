@@ -668,6 +668,49 @@ async function generateCoverArt() {
   console.log("   ✅ Cover art generated");
 }
 
+// ── Create test enrollment for admin ──
+async function createTestEnrollment(adminId: string) {
+  console.log("\n📚 Creating test enrollment...");
+
+  // Get the demo course
+  const { data: course } = await supabase
+    .from("courses")
+    .select("id")
+    .eq("slug", "the-art-of-conscious-love")
+    .single();
+
+  if (!course) {
+    console.log("   ⚠ Demo course not found, skipping enrollment");
+    return;
+  }
+
+  // Check if enrollment already exists
+  const { data: existing } = await supabase
+    .from("enrollments")
+    .select("id")
+    .eq("user_id", adminId)
+    .eq("course_id", course.id)
+    .in("status", ["active", "manual"])
+    .maybeSingle();
+
+  if (existing) {
+    console.log("   ℹ Admin already enrolled in demo course");
+    return;
+  }
+
+  await supabase.from("enrollments").insert({
+    user_id: adminId,
+    course_id: course.id,
+    amount_paid: 5000,
+    base_amount: 4237,
+    gst_amount: 763,
+    status: "active",
+    enrolled_at: new Date().toISOString(),
+  });
+
+  console.log("   ✅ Admin enrolled in 'The Art of Conscious Love'");
+}
+
 // ── Main ──
 async function main() {
   console.log("🌸 Bloom Setup");
@@ -677,6 +720,9 @@ async function main() {
   await generateCoverArt();
   const adminId = await createAdmin();
   await seedCourses();
+  if (adminId) {
+    await createTestEnrollment(adminId);
+  }
 
   console.log("\n═══════════════════════════════════════");
   console.log("✅ Setup complete!\n");
