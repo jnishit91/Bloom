@@ -1,26 +1,233 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Bloom Design System ── */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* shadcn semantic vars → Bloom palette */
+  --background: #FAF6EF;
+  --foreground: #0E1B14;
+  --card: #FFFFFF;
+  --card-foreground: #0E1B14;
+  --popover: #FFFFFF;
+  --popover-foreground: #0E1B14;
+  --primary: #E75D7C;
+  --primary-foreground: #FFFFFF;
+  --secondary: #8FAE94;
+  --secondary-foreground: #FFFFFF;
+  --muted: #F0ECE4;
+  --muted-foreground: #6B6962;
+  --accent: #E8A94F;
+  --accent-foreground: #0E1B14;
+  --destructive: #DC2626;
+  --border: #E5E0D5;
+  --input: #E5E0D5;
+  --ring: #E75D7C;
+
+  /* Charts — Bloom palette */
+  --chart-1: #E75D7C;
+  --chart-2: #8FAE94;
+  --chart-3: #E8A94F;
+  --chart-4: #0E1B14;
+  --chart-5: #D04466;
+
+  --radius: 0.75rem;
+
+  /* Sidebar — Bloom themed */
+  --sidebar: #FAF6EF;
+  --sidebar-foreground: #0E1B14;
+  --sidebar-primary: #E75D7C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F0ECE4;
+  --sidebar-accent-foreground: #0E1B14;
+  --sidebar-border: #E5E0D5;
+  --sidebar-ring: #E75D7C;
+}
+
+.dark {
+  --background: #0E1B14;
+  --foreground: #FAF6EF;
+  --card: #1a2e22;
+  --card-foreground: #FAF6EF;
+  --popover: #1a2e22;
+  --popover-foreground: #FAF6EF;
+  --primary: #E75D7C;
+  --primary-foreground: #FFFFFF;
+  --secondary: #6E8E73;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1a2e22;
+  --muted-foreground: #A8C4AC;
+  --accent: #E8A94F;
+  --accent-foreground: #FAF6EF;
+  --destructive: #EF4444;
+  --border: #2a4033;
+  --input: #2a4033;
+  --ring: #E75D7C;
+  --chart-1: #F0899F;
+  --chart-2: #A8C4AC;
+  --chart-3: #F0C278;
+  --chart-4: #FAF6EF;
+  --chart-5: #E75D7C;
+  --sidebar: #0E1B14;
+  --sidebar-foreground: #FAF6EF;
+  --sidebar-primary: #E75D7C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1a2e22;
+  --sidebar-accent-foreground: #FAF6EF;
+  --sidebar-border: #2a4033;
+  --sidebar-ring: #E75D7C;
 }
 
 @theme inline {
+  /* Extended Bloom palette colors */
+  --color-botanical: #0E1B14;
+  --color-botanical-light: #1a2e22;
+  --color-ivory: #FAF6EF;
+  --color-ivory-warm: #F5EFE4;
+  --color-bloom-rose: #E75D7C;
+  --color-bloom-rose-light: #F0899F;
+  --color-bloom-rose-dark: #D04466;
+  --color-dawn-gold: #E8A94F;
+  --color-dawn-gold-light: #F0C278;
+  --color-dawn-gold-dark: #D4923A;
+  --color-sage: #8FAE94;
+  --color-sage-light: #A8C4AC;
+  --color-sage-dark: #6E8E73;
+
+  /* Semantic shadcn color mapping */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+
+  /* Typography */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-heading: var(--font-fraunces), Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Bloom radii */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-bloom-sm: 16px;
+  --radius-bloom: 20px;
+  --radius-bloom-lg: 24px;
+
+  /* Warm layered shadows */
+  --shadow-bloom-sm: 0 1px 3px rgba(14, 27, 20, 0.04), 0 1px 2px rgba(14, 27, 20, 0.06);
+  --shadow-bloom: 0 4px 12px rgba(14, 27, 20, 0.05), 0 2px 6px rgba(14, 27, 20, 0.04);
+  --shadow-bloom-lg: 0 12px 32px rgba(14, 27, 20, 0.08), 0 4px 12px rgba(14, 27, 20, 0.04);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Bloom Animations ── */
+
+@keyframes bloom-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
+
+@keyframes bloom-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.95); }
+}
+
+@keyframes petal-unfurl {
+  0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+  60% { transform: scale(1.05) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes check-pop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.animate-bloom-spin { animation: bloom-spin 20s linear infinite; }
+.animate-bloom-pulse { animation: bloom-pulse 3s ease-in-out infinite; }
+.animate-petal-unfurl { animation: petal-unfurl 0.6s ease-out forwards; }
+.animate-float-gentle { animation: float-gentle 4s ease-in-out infinite; }
+.animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+.animate-check-pop { animation: check-pop 0.3s ease-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bloom-spin,
+  .animate-bloom-pulse,
+  .animate-petal-unfurl,
+  .animate-float-gentle,
+  .animate-fade-in-up,
+  .animate-check-pop {
+    animation: none !important;
+  }
+}
+
+/* ── Dawn gradients ── */
+.bg-dawn-gradient {
+  background: linear-gradient(135deg, #2D1B33 0%, #E75D7C 50%, #E8A94F 100%);
+}
+
+.bg-dawn-gradient-subtle {
+  background: linear-gradient(135deg, #FAF6EF 0%, #FFF0F3 50%, #FFF8ED 100%);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #8FAE94; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6E8E73; }
