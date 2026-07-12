@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { BookOpen, Clock, User } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -5,15 +8,94 @@ export const metadata: Metadata = {
   description: "Browse Bloom's relationship-transformation courses.",
 };
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const supabase = await createClient();
+
+  const { data: courses } = await supabase
+    .from("courses")
+    .select(
+      "id, slug, title, subtitle, cover_image_url, total_lessons, total_weeks, price_inr, status, category, instructor_name",
+    )
+    .eq("status", "published")
+    .order("created_at");
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="font-display text-3xl text-botanical tracking-tight mb-2">
-        Courses
-      </h1>
-      <p className="text-muted-foreground text-lg">
-        Premium courses to transform your relationships. More coming soon.
-      </p>
+      <div className="max-w-2xl mb-10">
+        <h1 className="font-display text-3xl sm:text-4xl text-botanical tracking-tight">
+          Courses
+        </h1>
+        <p className="mt-2 text-muted-foreground text-lg">
+          Premium relationship-transformation courses. Each one is a guided journey of inner work — not just information.
+        </p>
+      </div>
+
+      {courses && courses.length > 0 ? (
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {courses.map((course) => (
+            <Link
+              key={course.id}
+              href={`/courses/${course.slug}`}
+              className="group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom transition-all duration-200"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden">
+                {course.cover_image_url ? (
+                  <div
+                    className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
+                    style={{ backgroundImage: `url(${course.cover_image_url})` }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-dawn-gradient group-hover:scale-105 transition-transform duration-300" />
+                )}
+              </div>
+              <div className="p-5 space-y-3">
+                {course.category && (
+                  <span className="text-xs font-medium text-sage-dark uppercase tracking-wider">
+                    {course.category}
+                  </span>
+                )}
+                <h3 className="font-display text-xl text-botanical leading-snug">
+                  {course.title}
+                </h3>
+                {course.subtitle && (
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {course.subtitle}
+                  </p>
+                )}
+                <div className="flex items-center gap-4 text-sm text-muted-foreground pt-1">
+                  <span className="flex items-center gap-1">
+                    <User className="size-3.5" />
+                    {course.instructor_name}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="size-3.5" />
+                    {course.total_lessons} lessons
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="size-3.5" />
+                    {course.total_weeks} weeks
+                  </span>
+                </div>
+                <div className="pt-2 border-t border-border">
+                  <span className="font-semibold text-botanical text-lg">
+                    ₹{course.price_inr.toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-2">
+                    Lifetime access
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="py-20 text-center">
+          <BookOpen className="size-10 text-muted-foreground/30 mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            No courses available yet. Check back soon!
+          </p>
+        </div>
+      )}
     </div>
   );
 }

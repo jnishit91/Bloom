@@ -80,10 +80,30 @@
 - **BloomAiButton** is a separate client component so top-nav remains a server component
 - **Slide-in animation** for drawer with prefers-reduced-motion respect
 
-## Phase 4: Commerce — Pending
-- [ ] Public homepage, catalog, course sales page
-- [ ] Razorpay checkout with webhook verification
-- [ ] Enrollment gating, free-preview lessons
+## Phase 4: Commerce ✅
+
+### Done
+- [x] Public homepage at `/` — hero with transformation promise, featured courses from DB, how-it-works 4-step section, facilitator credibility, testimonials, pricing ("Every course ₹5,000. Lifetime access."), FAQ accordion, footer
+- [x] Catalog at `/courses` — filterable grid of published courses (cover art, title, instructor, lesson count, weeks, price)
+- [x] Course sales page at `/courses/[slug]` — cinematic dark hero with trailer video, "What you'll learn" outcomes grid, full curriculum accordion (modules → lessons with durations, free-preview lessons playable inline), instructor bio, testimonial stars, sticky enroll CTA (mobile bottom bar + desktop floating card)
+- [x] `src/lib/razorpay.ts` — GST calculation (₹5,000 inclusive at 18%: base=4237, gst=763), Razorpay order creation via REST API, webhook HMAC-SHA256 signature verification, payment signature verification
+- [x] `/api/checkout` — POST: creates Razorpay order + pending enrollment with GST breakup, returns config for Razorpay Checkout modal
+- [x] `/api/checkout/status` — GET: polls enrollment status for post-payment confirmation page, returns receipt data + first lesson ID
+- [x] `/api/webhooks/razorpay` — POST: verifies X-Razorpay-Signature, flips enrollment to 'active' on payment.captured or 'failed' on payment.failed; uses service role client (no user session); rejects tampered payloads
+- [x] CheckoutButton component — loads Razorpay Checkout script, opens UPI-first modal (UPI block primary, cards/netbanking/wallets secondary), handles payment success → confirmation page, dismissal, and failure
+- [x] PaymentConfirmation component — polls enrollment status every 1s (up to 30s), shows: "Confirming payment…" → celebration + "Start Lesson 1" on active, or clear retry on failed; includes branded receipt (order ID, payment ID, base amount, GST, total, date)
+- [x] Enrollment confirmation page at `/courses/[slug]/enroll` with Suspense boundary
+- [x] `npm run simulate:webhook` — dev script that posts correctly signed payload for payment.captured or payment.failed to local webhook route; also tests tampered signature rejection
+- [x] Enrollment gating from Phase 2 verified: pending/failed enrollments don't grant access, only 'active'/'manual' do; free-preview lessons bypass check
+- [x] Build compiles cleanly with zero TypeScript errors
+
+### Decisions Made
+- **No Razorpay npm SDK** — just fetch to Razorpay REST API with Basic auth for order creation; keeps dependencies minimal
+- **GST inclusive** — single `computeGst()` function with one config constant (18%); ₹5,000 = ₹4,237 base + ₹763 GST
+- **Enrollment status changes ONLY in webhook** — client never writes enrollment status; polling reads only
+- **UPI-first Razorpay Checkout** — uses `config.display.blocks` to show UPI as primary payment method with QR + app intents
+- **Homepage is a standalone page** — not inside the (app) layout group, has its own nav/footer for marketing feel
+- **Sticky CTA** — mobile bottom bar + desktop floating card on sales page for maximum conversion
 
 ## Phase 5: Admin Portal — Pending
 - [ ] Role-gated /admin with course CRUD
