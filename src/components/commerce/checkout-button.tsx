@@ -31,6 +31,7 @@ export function CheckoutButton({
 }: CheckoutButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleCheckout() {
     setLoading(true);
@@ -50,7 +51,7 @@ export function CheckoutButton({
 
       if (!res.ok) {
         if (data.error === "Already enrolled") {
-          router.push(`/courses/${courseSlug}`);
+          router.push("/home");
           return;
         }
         if (data.error === "Unauthorized") {
@@ -112,7 +113,7 @@ export function CheckoutButton({
       rzp.open();
     } catch (err) {
       console.error("Checkout error:", err);
-      alert(
+      setError(
         err instanceof Error ? err.message : "Something went wrong. Please try again.",
       );
       setLoading(false);
@@ -122,7 +123,7 @@ export function CheckoutButton({
   return (
     <div className={className}>
       <Button
-        onClick={handleCheckout}
+        onClick={() => { setError(null); handleCheckout(); }}
         disabled={loading}
         size={size}
         className="w-full gap-2"
@@ -138,6 +139,9 @@ export function CheckoutButton({
           </>
         )}
       </Button>
+      {error && (
+        <p className="mt-2 text-sm text-destructive text-center">{error}</p>
+      )}
       <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-muted-foreground">
         <ShieldCheck className="size-3.5" />
         <span>Secure payment via Razorpay · UPI, cards, netbanking</span>

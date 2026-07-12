@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 interface ProfileMenuProps {
   user: {
@@ -56,15 +56,6 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
           </p>
           <p className="text-xs text-muted-foreground truncate">{user.email}</p>
         </div>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2 cursor-pointer">
-          <User className="size-4" />
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2 cursor-pointer">
-          <Settings className="size-4" />
-          Settings
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="gap-2 cursor-pointer text-destructive focus:text-destructive"

@@ -12,6 +12,8 @@ interface LessonFooterProps {
   prevLessonId: string | null;
   nextLessonId: string | null;
   isCompleted: boolean;
+  completedLessons: number;
+  totalLessons: number;
 }
 
 export function LessonFooter({
@@ -20,6 +22,8 @@ export function LessonFooter({
   prevLessonId,
   nextLessonId,
   isCompleted,
+  completedLessons,
+  totalLessons,
 }: LessonFooterProps) {
   const router = useRouter();
   const [completed, setCompleted] = useState(isCompleted);
@@ -52,10 +56,14 @@ export function LessonFooter({
       // Auto-advance after celebration
       setTimeout(() => {
         setCelebrating(false);
-        if (nextLessonId) {
+        const willBeComplete = completedLessons + 1 >= totalLessons;
+        if (willBeComplete && totalLessons > 0) {
+          router.push(`/courses/${courseSlug}/certificate`);
+        } else if (nextLessonId) {
           router.push(`/learn/${courseSlug}/${nextLessonId}`);
+        } else {
+          router.refresh();
         }
-        router.refresh();
       }, 1800);
     });
   }
@@ -65,8 +73,8 @@ export function LessonFooter({
       {/* Celebration overlay */}
       {celebrating && <CelebrationOverlay />}
 
-      <div className="sticky bottom-0 z-30 border-t border-border bg-white/95 backdrop-blur-sm px-4 py-3">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+      <div className="sticky bottom-0 z-30 border-t border-border bg-white/95 backdrop-blur-sm px-3 sm:px-4 py-3 safe-bottom">
+        <div className="flex items-center justify-between max-w-4xl mx-auto gap-2">
           {/* Previous */}
           {prevLessonId ? (
             <Button
@@ -76,7 +84,7 @@ export function LessonFooter({
               className="gap-1"
             >
               <ChevronLeft className="size-4" />
-              Previous
+              <span className="hidden xs:inline">Previous</span>
             </Button>
           ) : (
             <div />
@@ -86,24 +94,26 @@ export function LessonFooter({
           <Button
             onClick={handleMarkComplete}
             disabled={completed || isPending}
-            size="lg"
-            className={
+            size="default"
+            className={`text-sm sm:text-base sm:h-12 sm:px-6 sm:rounded-2xl ${
               completed
-                ? "bg-sage hover:bg-sage text-white gap-2 cursor-default"
-                : "gap-2"
-            }
+                ? "bg-sage hover:bg-sage text-white gap-1.5 sm:gap-2 cursor-default"
+                : "gap-1.5 sm:gap-2"
+            }`}
           >
             {completed ? (
               <>
-                <Check className="size-5" />
-                Completed
+                <Check className="size-4 sm:size-5" />
+                <span className="hidden xs:inline">Completed</span>
+                <span className="xs:hidden">Done</span>
               </>
             ) : isPending ? (
               "Completing…"
             ) : (
               <>
-                <Check className="size-5" />
-                Mark As Complete
+                <Check className="size-4 sm:size-5" />
+                <span className="hidden sm:inline">Mark As Complete</span>
+                <span className="sm:hidden">Complete</span>
               </>
             )}
           </Button>
@@ -116,7 +126,7 @@ export function LessonFooter({
               onClick={() => router.push(`/learn/${courseSlug}/${nextLessonId}`)}
               className="gap-1"
             >
-              Next
+              <span className="hidden xs:inline">Next</span>
               <ChevronRight className="size-4" />
             </Button>
           ) : (

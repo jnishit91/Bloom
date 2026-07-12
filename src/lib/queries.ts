@@ -398,3 +398,49 @@ export async function getOrderedLessonIds(
     })
     .map((l) => l.id);
 }
+
+export async function getLearningStreak(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<number> {
+  const { data } = await supabase
+    .from("lesson_progress")
+    .select("completed_at")
+    .eq("user_id", userId)
+    .eq("completed", true)
+    .not("completed_at", "is", null)
+    .order("completed_at", { ascending: false });
+
+  if (!data || data.length === 0) return 0;
+
+  // Get unique dates (YYYY-MM-DD in user's local timezone approximation)
+  const uniqueDays = new Set<string>();
+  for (const row of data) {
+    if (row.completed_at) {
+      uniqueDays.add(row.completed_at.slice(0, 10));
+    }
+  }
+
+  const sortedDays = [...uniqueDays].sort().reverse();
+  if (sortedDays.length === 0) return 0;
+
+  // Check if the most recent day is today or yesterday
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+  if (sortedDays[0] !== today && sortedDays[0] !== yesterday) return 0;
+
+  let streak = 1;
+  for (let i = 1; i < sortedDays.length; i++) {
+    const prev = new Date(sortedDays[i - 1]!);
+    const curr = new Date(sortedDays[i]!);
+    const diffDays = (prev.getTime() - curr.getTime()) / 86400000;
+    if (Math.round(diffDays) === 1) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}

@@ -392,7 +392,8 @@ export default async function HomePage() {
 }
 
 function BloomIcon({ light = false }: { light?: boolean }) {
-  const color = light ? "#E75D7C" : "#E75D7C";
+  const petalColor = light ? "#FFFFFF" : "#E75D7C";
+  const centerColor = light ? "#E8A94F" : "#E8A94F";
   return (
     <svg width="28" height="28" viewBox="0 0 40 40">
       {[0, 72, 144, 216, 288].map((angle) => (
@@ -402,12 +403,12 @@ function BloomIcon({ light = false }: { light?: boolean }) {
           cy="12"
           rx="6"
           ry="12"
-          fill={color}
+          fill={petalColor}
           opacity={0.85}
           transform={`rotate(${angle} 20 20)`}
         />
       ))}
-      <circle cx="20" cy="20" r="4" fill={light ? "#E8A94F" : "#E8A94F"} />
+      <circle cx="20" cy="20" r="4" fill={centerColor} />
     </svg>
   );
 }

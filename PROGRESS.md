@@ -105,11 +105,90 @@
 - **Homepage is a standalone page** — not inside the (app) layout group, has its own nav/footer for marketing feel
 - **Sticky CTA** — mobile bottom bar + desktop floating card on sales page for maximum conversion
 
-## Phase 5: Admin Portal — Pending
-- [ ] Role-gated /admin with course CRUD
-- [ ] Enrollment & accountability analytics dashboard
-- [ ] Manual access grant, payments log, content import, health check
+## Phase 5: Admin Portal ✅
 
-## Phase 6: Community & Polish — Pending
-- [ ] Reflections/Discuss tab, streaks, completion certificate
-- [ ] Full mobile pass at 360px, performance, accessibility
+### Done
+- [x] `src/lib/admin.ts` — `requireAdmin()` server-side role gate: checks auth + profile.role='admin', redirects non-admins
+- [x] `src/lib/admin-api.ts` — `withAdmin()` API route wrapper with 401/403 responses
+- [x] Admin layout at `/admin` — dedicated sidebar nav (Dashboard, Courses, Members, Payments, Analytics, Import, Health), mobile hamburger menu, "Back to app" link, role check in layout (never client-side)
+- [x] Admin dashboard (`/admin`) — headline stat cards: total users, paid enrollments, total revenue (₹), conversion rate, week-over-week enrollment comparison; courses summary table with status badges
+- [x] Course management (`/admin/courses`) — grid of course cards with status/enrollment count; "New Course" flow at `/admin/courses/new`
+- [x] Course editor (`/admin/courses/[id]`) — full CRUD: edit title, subtitle, description, instructor info, cover/trailer URLs, price, weeks, category, learning outcomes array; module management (add/rename/delete); lesson management (add/edit/delete with title, description, video URL, duration, transcript, free-preview toggle); publish/unpublish toggle that recounts lessons; delete course with confirmation
+- [x] API routes: POST/PATCH/DELETE `/api/admin/courses`, modules, lessons, publish
+- [x] Members table (`/admin/members`) — all registered users with name, email, phone, signup date; enrollment status badges (Paid green / Started checkout amber / Never attempted grey); expandable enrollment details per user; search by name/email/phone; filter by status; CSV export
+- [x] Manual access grant — modal: select course, add note (e.g. "paid via direct UPI"), creates enrollment with status='manual'; tagged in analytics so revenue stays honest
+- [x] Payments log (`/admin/payments`) — every enrollment record with user, course, Razorpay order/payment IDs, amount with GST breakup, status badge, note, timestamp; search and status filter
+- [x] Analytics dashboard (`/admin/analytics`) — headline stats + per-course breakdown table (enrollments, revenue, avg completion rate with progress bar); enrollment-over-time bar chart (12-week view) per selected course
+- [x] Course content import (`/admin/import`) — upload Markdown (.md) file or paste directly; parses `# Heading` as modules, `## Heading` as lessons, body as description/transcript; live preview of parsed structure; creates draft course with all modules/lessons; format guide on page
+- [x] Health check page (`/admin/status`) — green/red indicators for: Database connection, Razorpay keys, Webhook secret, AI endpoint reachability, Service role key; overall status banner; recheck button
+- [x] Build compiles cleanly with zero TypeScript errors
+
+### Decisions Made
+- **Admin layout is separate from (app) layout** — no TopNav, AiProvider, ChatDrawer in admin; denser utilitarian design as spec requires
+- **Role check in layout** — `requireAdmin()` runs in the layout server component so every admin page is gated without repetition
+- **Service role client for email lookups** — profiles table doesn't store email, so members/payments pages use `supabase.auth.admin.listUsers()` via service role key
+- **Enrollment chart is pure CSS/HTML** — no charting library needed for the simple bar chart; keeps bundle minimal
+- **Import uses Markdown only** — DOCX parsing would require a heavy library; Markdown covers the use case with a clear heading-level convention
+
+## Phase 6: Community & Polish ✅
+
+### Done
+- [x] Discuss tab in lesson sidebar — real reflection composer + public reflections feed with relative timestamps, wired to `/api/reflections` endpoint; replaces Phase 2 placeholder
+- [x] Community page (`/community`) — server-rendered feed of all public reflections across courses, with author avatars, lesson/course titles, relative timestamps
+- [x] `/api/reflections` GET endpoint — fetches public reflections by lessonId or all (for community page), joins profiles and lessons/courses
+- [x] Learning streak counter on dashboard — `getLearningStreak()` queries lesson_progress for consecutive learning days; flame icon with pulse animation at 3+ day streaks; displayed next to welcome message on `/home`
+- [x] Completion certificate at `/courses/[slug]/certificate` — server-verified 100% completion gate; Bloom-branded certificate with botanical motifs, member name, course title, instructor, date; download via browser print dialog; share via Web Share API (clipboard fallback)
+- [x] Lesson footer upgraded — detects course completion (completedLessons === totalLessons) and redirects to certificate page instead of next lesson
+- [x] 360px mobile pass — input zoom prevention (font-size: 16px on inputs), tighter padding, safe area inset support, 44px minimum touch targets for coarse pointers
+- [x] Accessibility improvements — skip-to-content link in root layout, `id="main-content"` on main elements (app + admin layouts), `role="banner"` on header, `aria-label` on nav elements (main + admin)
+- [x] Loading skeletons — `/home/loading.tsx`, `/courses/loading.tsx`, `/admin/loading.tsx` with Bloom-themed shimmer animations
+- [x] Safe area support for AI chat drawer input area on notched mobile devices
+- [x] Build compiles cleanly with zero TypeScript errors across 35 routes
+
+### Decisions Made
+- **No charting library for community** — reflections feed is a simple card list; relative timestamps via manual calculation, no `date-fns` needed
+- **Certificate download uses `window.print()`** — avoids `html2canvas` dependency; print stylesheets give clean PDF output
+- **Streak calculation is server-side** — runs in `getLearningStreak()` with a single DB query grouping by date, no client-side date math
+- **Mobile touch targets use `@media (pointer: coarse)`** — only enlarges targets on actual touch devices, desktop stays compact
+
+---
+
+## Phase 7: Final Walkthrough Fixes ✅
+
+### Done — Blockers
+- [x] Fixed `xs:` Tailwind breakpoint undefined — lesson footer labels ("Previous"/"Next"/"Completed") were invisible; added `--breakpoint-xs: 30rem` to `@theme`
+- [x] Fixed module rename firing API PATCH on every keystroke — debounced to 500ms with `useRef` timer
+- [x] Replaced `alert()` for checkout errors with inline error message below the button
+
+### Done — Should-Fix (Customer Journey)
+- [x] Fixed `BloomIcon` light prop rendering same color on both branches — footer icon now uses white petals on dark background
+- [x] Fixed AI disclaimer to match spec: "Bloom AI offers general guidance, not professional or therapeutic advice."
+- [x] Added working mobile hamburger menu — slide-in drawer with Home, Courses, Community links
+- [x] Added `@media print` stylesheet for certificate — hides nav/buttons, clean PDF output
+- [x] Public `/courses` page now includes Coming Soon (draft) courses with badge, matching dashboard catalog behavior
+- [x] Fixed "already enrolled" checkout redirect: goes to `/home` instead of back to the sales page
+- [x] Fixed `router.refresh()` firing after `router.push()` in lesson footer — only refreshes when no navigation occurred
+- [x] Removed inert Profile/Settings menu items from profile dropdown (no pages exist for these)
+- [x] Made Bloom AI button visible on mobile — icon-only button on small screens, labeled on larger
+- [x] Added save success/error feedback to admin course editor
+
+### Done — Should-Fix (Admin Journey)
+- [x] Fixed slug auto-regeneration on every course title save — no longer overwrites existing slugs on PATCH
+- [x] Replaced `window.location.reload()` with `router.refresh()` after manual enrollment grant
+- [x] Added drag-and-drop support to course import file upload (had "drop it here" text but no handlers)
+
+### Deliberately Deferred
+- **Video hosting migration** — VideoPlayer uses `<video src>` which only works with direct file URLs. YouTube/Vimeo URLs require iframe embeds. Deferred until video hosting provider is chosen (Mux recommended for production)
+- **Captions** — captions toggle button in video player is cosmetic; needs `<track>` elements with WebVTT files per lesson
+- **`next/image` migration** — all images use CSS background-image or raw `<img>` tags. Switching to `next/image` improves performance on mid-range Android but requires refactoring cover art rendering across 6+ components
+- **Reflection pre-loading** — revisiting a lesson shows an empty reflection form; existing reflection should be fetched on mount
+- **Reflection upsert** — multiple saves create duplicate reflections; should upsert on `(user_id, lesson_id)`
+- **Quiz score persistence** — quiz_attempts row is created with empty answers; client never updates it with actual score
+- **Search functionality** — search button removed from nav (was non-functional); to be implemented when course count grows
+- **Notifications** — bell icon removed from nav (was non-functional); to be implemented with engagement features
+- **Admin lesson task/resource editing** — tasks and resources are read-only in the course editor; requires UI for add/edit/remove
+- **Admin instructor photo URL field** — field exists in schema but has no input in the course editor form
+- **N+1 query optimization** — dashboard and analytics queries make multiple sequential DB calls per course; should be batched for scale
+- **Testimonials** — currently hardcoded on landing and sales pages; to be replaced with real testimonials from DB or removed pre-launch
+- **Free preview without login** — clicking "Free Preview" on sales page requires login; unauthenticated access deferred pending auth flow decision
+- **Email confirmation on signup** — Supabase requires email confirmation before dashboard access; deferred pending founder's auth preference

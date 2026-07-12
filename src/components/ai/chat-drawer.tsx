@@ -267,7 +267,7 @@ export function ChatDrawer() {
 
         {/* Input (chat mode only) */}
         {activeMode === "chat" && (
-          <div className="border-t border-border bg-white px-4 py-3 flex-shrink-0">
+          <div className="border-t border-border bg-white px-4 py-3 flex-shrink-0 safe-bottom">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
                 ref={inputRef}
@@ -291,7 +291,7 @@ export function ChatDrawer() {
               </button>
             </form>
             <p className="text-[10px] text-muted-foreground/60 mt-1.5 text-center">
-              AI responses may not always be accurate. Verify important information.
+              Bloom AI offers general guidance, not professional or therapeutic advice.
             </p>
           </div>
         )}

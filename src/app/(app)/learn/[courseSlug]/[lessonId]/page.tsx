@@ -152,6 +152,8 @@ export default async function LessonPage({ params }: PageProps) {
           prevLessonId={prevLessonId}
           nextLessonId={nextLessonId}
           isCompleted={progress?.completed || false}
+          completedLessons={completedLessons}
+          totalLessons={lesson.module.course.total_lessons}
         />
       </div>
 
@@ -162,6 +164,7 @@ export default async function LessonPage({ params }: PageProps) {
         currentLessonId={lessonId}
         totalLessons={lesson.module.course.total_lessons}
         completedLessons={completedLessons}
+        lessonId={lessonId}
       />
     </div>
   );

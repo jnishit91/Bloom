@@ -2,12 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BloomLogo } from "./bloom-logo";
 import { ProfileMenu } from "./profile-menu";
-import {
-  Search,
-  Bell,
-  Menu,
-} from "lucide-react";
 import { BloomAiButton } from "./bloom-ai-button";
+import { MobileNav } from "./mobile-nav";
 import { Button } from "@/components/ui/button";
 
 export async function TopNav() {
@@ -28,12 +24,12 @@ export async function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-ivory/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-ivory/80 backdrop-blur-md" role="banner">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: Logo + Nav */}
         <div className="flex items-center gap-8">
           <BloomLogo />
-          <nav className="hidden md:flex items-center gap-1">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1">
             <NavLink href="/home">Home</NavLink>
             <NavLink href="/courses">Courses</NavLink>
             <NavLink href="/community">Community</NavLink>
@@ -42,16 +38,6 @@ export async function TopNav() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex text-muted-foreground hover:text-botanical">
-            <Search className="size-5" />
-            <span className="sr-only">Search</span>
-          </Button>
-
-          <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-botanical">
-            <Bell className="size-5" />
-            <span className="sr-only">Notifications</span>
-          </Button>
-
           <BloomAiButton />
 
           {user && profile ? (
@@ -68,11 +54,7 @@ export async function TopNav() {
             </Link>
           )}
 
-          {/* Mobile menu toggle */}
-          <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground">
-            <Menu className="size-5" />
-            <span className="sr-only">Menu</span>
-          </Button>
+          <MobileNav />
         </div>
       </div>
     </header>

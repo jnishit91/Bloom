@@ -13,6 +13,7 @@ import {
   X,
   ChevronUp,
 } from "lucide-react";
+import { DiscussTab } from "./discuss-tab";
 
 interface LessonSidebarProps {
   modules: ModuleWithLessons[];
@@ -20,6 +21,7 @@ interface LessonSidebarProps {
   currentLessonId: string;
   totalLessons: number;
   completedLessons: number;
+  lessonId: string;
 }
 
 export function LessonSidebar({
@@ -28,6 +30,7 @@ export function LessonSidebar({
   currentLessonId,
   totalLessons,
   completedLessons,
+  lessonId,
 }: LessonSidebarProps) {
   const [activeTab, setActiveTab] = useState<"lessons" | "discuss">("lessons");
 
@@ -49,6 +52,7 @@ export function LessonSidebar({
           completedModules={completedModules}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          lessonId={lessonId}
         />
       </aside>
 
@@ -62,6 +66,7 @@ export function LessonSidebar({
         completedModules={completedModules}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        lessonId={lessonId}
       />
     </>
   );
@@ -76,6 +81,7 @@ function MobileBottomSheet({
   completedModules,
   activeTab,
   onTabChange,
+  lessonId,
 }: {
   modules: ModuleWithLessons[];
   courseSlug: string;
@@ -85,6 +91,7 @@ function MobileBottomSheet({
   completedModules: number;
   activeTab: "lessons" | "discuss";
   onTabChange: (tab: "lessons" | "discuss") => void;
+  lessonId: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -93,7 +100,7 @@ function MobileBottomSheet({
       {/* Floating toggle button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-20 right-4 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-botanical text-white shadow-bloom-lg hover:bg-botanical-light transition-colors cursor-pointer"
+        className="fixed bottom-20 right-4 z-40 flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-full bg-botanical text-white shadow-bloom-lg hover:bg-botanical-light transition-colors cursor-pointer safe-bottom"
       >
         <BookOpen className="size-4" />
         <span className="text-sm font-medium">
@@ -133,6 +140,7 @@ function MobileBottomSheet({
                 activeTab={activeTab}
                 onTabChange={onTabChange}
                 onLessonClick={() => setOpen(false)}
+                lessonId={lessonId}
               />
             </div>
           </div>
@@ -152,6 +160,7 @@ function SidebarContent({
   activeTab,
   onTabChange,
   onLessonClick,
+  lessonId,
 }: {
   modules: ModuleWithLessons[];
   courseSlug: string;
@@ -162,6 +171,7 @@ function SidebarContent({
   activeTab: "lessons" | "discuss";
   onTabChange: (tab: "lessons" | "discuss") => void;
   onLessonClick?: () => void;
+  lessonId: string;
 }) {
   return (
     <div className="flex flex-col h-full">
@@ -300,16 +310,7 @@ function SidebarContent({
           </div>
         </div>
       ) : (
-        /* Discuss tab — placeholder */
-        <div className="flex-1 flex items-center justify-center p-8 text-center">
-          <div className="space-y-3">
-            <MessageSquare className="size-10 text-muted-foreground/40 mx-auto" />
-            <p className="text-muted-foreground text-sm">
-              Community discussions coming soon. Share your reflections and
-              connect with fellow learners.
-            </p>
-          </div>
-        </div>
+        <DiscussTab lessonId={lessonId} />
       )}
     </div>
   );

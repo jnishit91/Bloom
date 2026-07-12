@@ -136,6 +136,9 @@
   --font-heading: var(--font-fraunces), Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
 
+  /* Breakpoints */
+  --breakpoint-xs: 30rem;
+
   /* Bloom radii */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -238,3 +241,45 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #8FAE94; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #6E8E73; }
+
+/* ── Print styles for certificate ── */
+@media print {
+  header, footer, nav, .sticky, button, a[href="/home"] { display: none !important; }
+  body { background: white !important; }
+  main { padding: 0 !important; }
+}
+
+/* ── Mobile 360px fixes ── */
+@media (max-width: 400px) {
+  /* Prevent zoom on input focus (iOS) */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Tighter padding on very small screens */
+  .max-w-7xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Safe area for mobile bottom bars */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Touch targets — minimum 44px on mobile */
+@media (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Exempt icon-only buttons that already have explicit sizing */
+  [data-slot="button"][class*="icon-xs"],
+  [data-slot="button"][class*="size-7"] {
+    min-height: auto;
+    min-width: auto;
+  }
+}
