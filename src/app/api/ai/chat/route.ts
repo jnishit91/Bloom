@@ -8,6 +8,7 @@ import {
   buildSummarizePrompt,
   buildQuizPrompt,
   buildGlobalSystemPrompt,
+  isAiAvailable,
   type ChatMessage,
 } from "@/lib/ai";
 
@@ -33,6 +34,13 @@ export async function POST(req: NextRequest) {
 
   if (!mode || !["chat", "summarize", "quiz"].includes(mode)) {
     return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
+  }
+
+  if (!isAiAvailable()) {
+    return NextResponse.json(
+      { error: "AI is not configured yet. Please set up an AI endpoint (e.g. Ollama) and set AI_BASE_URL." },
+      { status: 503 }
+    );
   }
 
   try {

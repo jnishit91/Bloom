@@ -98,7 +98,8 @@ export default async function CourseSalesPage({ params }: PageProps) {
     isEnrolled = (count || 0) > 0;
   }
 
-  const outcomes = (course.outcomes || []) as string[];
+  const rawOutcomes = course.outcomes || [];
+  const outcomes: string[] = typeof rawOutcomes === "string" ? JSON.parse(rawOutcomes) : rawOutcomes;
   const totalMinutes = curriculum.reduce(
     (acc, mod) => acc + mod.lessons.reduce((a, l) => a + l.duration_minutes, 0),
     0,

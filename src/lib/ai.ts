@@ -2,7 +2,8 @@
 
 const BASE_URL = process.env.AI_BASE_URL || "http://localhost:11434/v1";
 const API_KEY = process.env.AI_API_KEY || "";
-const MODEL = process.env.AI_MODEL || "qwen2.5:14b-instruct";
+const MODEL = process.env.AI_MODEL || "qwen2.5:7b-instruct";
+const AI_ENABLED = process.env.AI_ENABLED !== "false";
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -20,12 +21,20 @@ interface StreamOptions {
  * Streams a chat completion from an OpenAI-compatible endpoint.
  * Returns a ReadableStream of SSE data chunks.
  */
+export function isAiAvailable(): boolean {
+  return AI_ENABLED && BASE_URL.length > 0;
+}
+
 export async function streamChat({
   messages,
   maxTokens = 1500,
   temperature = 0.7,
   signal,
 }: StreamOptions): Promise<ReadableStream<Uint8Array>> {
+  if (!isAiAvailable()) {
+    throw new Error("AI is not configured. Set AI_BASE_URL in your environment.");
+  }
+
   const res = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {

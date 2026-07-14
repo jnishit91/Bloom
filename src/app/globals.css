@@ -207,6 +207,17 @@
   to { transform: translateX(0); }
 }
 
+@keyframes petal-bloom-in {
+  0% { opacity: 0; }
+  100% { opacity: 0.9; }
+}
+
+.bloom-petal-first { opacity: 0.9; }
+.bloom-petal-reveal {
+  opacity: 0;
+  animation: petal-bloom-in 0.6s ease-out forwards;
+}
+
 .animate-bloom-spin { animation: bloom-spin 20s linear infinite; }
 .animate-bloom-pulse { animation: bloom-pulse 3s ease-in-out infinite; }
 .animate-petal-unfurl { animation: petal-unfurl 0.6s ease-out forwards; }

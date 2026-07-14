@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="50%" style="stop-color:#8FAE94"/>
+      <stop offset="100%" style="stop-color:#E8A94F"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg2)"/>
+  <circle cx="400" cy="260" r="100" fill="none" stroke="#FAF6EF" stroke-width="1" opacity="0.2"/>
+  <path d="M400 320 Q360 260 400 220 Q440 260 400 320Z" fill="#FAF6EF" opacity="0.15" transform="scale(2) translate(-200,-130)"/>
+  <text x="400" y="430" font-family="Georgia,serif" font-size="28" fill="#FAF6EF" text-anchor="middle" opacity="0.95">Healing After Heartbreak</text>
+  <text x="400" y="465" font-family="sans-serif" font-size="14" fill="#FAF6EF" text-anchor="middle" opacity="0.7">Coming Soon · 3 Weeks · 15 Lessons</text>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2D1B33"/>
+      <stop offset="50%" style="stop-color:#E75D7C"/>
+      <stop offset="100%" style="stop-color:#E8A94F"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E75D7C;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#E8A94F;stop-opacity:0.3"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <circle cx="400" cy="260" r="120" fill="url(#glow)" opacity="0.4"/>
+  <circle cx="400" cy="260" r="80" fill="none" stroke="#FAF6EF" stroke-width="1.5" opacity="0.3"/>
+  <circle cx="400" cy="260" r="45" fill="none" stroke="#FAF6EF" stroke-width="1" opacity="0.2"/>
+  <g transform="translate(400,250)" fill="#FAF6EF" opacity="0.9">
+    <ellipse cx="0" cy="-25" rx="12" ry="30" transform="rotate(0)"/>
+    <ellipse cx="0" cy="-25" rx="12" ry="30" transform="rotate(72)"/>
+    <ellipse cx="0" cy="-25" rx="12" ry="30" transform="rotate(144)"/>
+    <ellipse cx="0" cy="-25" rx="12" ry="30" transform="rotate(216)"/>
+    <ellipse cx="0" cy="-25" rx="12" ry="30" transform="rotate(288)"/>
+    <circle cx="0" cy="0" r="8" fill="#E8A94F"/>
+  </g>
+  <text x="400" y="430" font-family="Georgia,serif" font-size="28" fill="#FAF6EF" text-anchor="middle" opacity="0.95">The Art of Conscious Love</text>
+  <text x="400" y="465" font-family="sans-serif" font-size="14" fill="#FAF6EF" text-anchor="middle" opacity="0.7">4 Weeks · 20 Lessons · Transform How You Love</text>
+</svg>

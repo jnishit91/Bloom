@@ -20,7 +20,6 @@ export function SignupForm() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
@@ -41,47 +40,45 @@ export function SignupForm() {
     setLoading(true);
     setErrors({});
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone: phone || undefined,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(redirectTo)}`,
-      },
-    });
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, fullName, phone: phone || undefined }),
+      });
 
-    setLoading(false);
+      const data = await res.json();
 
-    if (error) {
-      if (error.message.includes("already registered")) {
-        setErrors({ email: "This email is already registered. Try logging in instead." });
-      } else {
-        setErrors({ form: error.message });
+      if (!res.ok) {
+        if (res.status === 409) {
+          setErrors({ email: data.error });
+        } else {
+          setErrors({ form: data.error || "Something went wrong" });
+        }
+        setLoading(false);
+        return;
       }
-      return;
+
+      // Account created and auto-confirmed — sign in immediately
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      setLoading(false);
+
+      if (signInError) {
+        setErrors({ form: "Account created but sign-in failed. Please try logging in." });
+        return;
+      }
+
+      router.push(redirectTo);
+      router.refresh();
+    } catch {
+      setLoading(false);
+      setErrors({ form: "Network error. Please try again." });
     }
-
-    setSuccess(true);
-  }
-
-  if (success) {
-    return (
-      <div className="text-center space-y-4 animate-fade-in-up">
-        <div className="w-16 h-16 mx-auto rounded-full bg-sage/20 flex items-center justify-center">
-          <svg className="size-8 text-sage-dark" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-          </svg>
-        </div>
-        <h3 className="font-display text-2xl text-botanical">Check your email</h3>
-        <p className="text-muted-foreground">
-          We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click it to activate your account and begin your journey.
-        </p>
-      </div>
-    );
   }
 
   return (
