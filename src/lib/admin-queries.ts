@@ -7,17 +7,55 @@ export interface DashboardStats {
   conversionRate: number;
   enrollmentsThisWeek: number;
   enrollmentsLastWeek: number;
+  revenueToday: number;
+  revenueThisWeek: number;
+  revenueThisMonth: number;
+  failedCheckouts: number;
+  multiCourseBuyers: number;
+  avgRevenuePerUser: number;
+  recentPayments: RecentPayment[];
+  recentSignups: RecentSignup[];
+  courseBreakdown: CourseBreakdownRow[];
+}
+
+export interface RecentPayment {
+  userName: string | null;
+  userEmail: string;
+  courseTitle: string;
+  amount: number;
+  status: string;
+  date: string;
+}
+
+export interface RecentSignup {
+  name: string | null;
+  email: string;
+  date: string;
+  hasEnrolled: boolean;
+}
+
+export interface CourseBreakdownRow {
+  title: string;
+  enrollments: number;
+  revenue: number;
 }
 
 export async function getDashboardStats(
   supabase: SupabaseClient
 ): Promise<DashboardStats> {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const twoWeeksAgo = new Date(now.getTime() - 14 * 86400000).toISOString();
+
   const [
     { count: totalUsers },
     { count: paidEnrollments },
-    { data: revenueData },
-    enrollmentsThisWeek,
-    enrollmentsLastWeek,
+    { data: allPaidEnrollments },
+    { count: failedCheckouts },
+    { data: recentEnrollmentRows },
+    { data: recentProfileRows },
   ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase
@@ -26,27 +64,127 @@ export async function getDashboardStats(
       .in("status", ["active", "manual"]),
     supabase
       .from("enrollments")
-      .select("amount_paid")
+      .select("user_id, course_id, amount_paid, enrolled_at, status")
       .in("status", ["active", "manual"]),
-    getEnrollmentCountSince(supabase, 7),
-    getEnrollmentCountBetween(supabase, 14, 7),
+    supabase
+      .from("enrollments")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["failed", "pending"]),
+    supabase
+      .from("enrollments")
+      .select("user_id, course_id, amount_paid, status, enrolled_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(10),
+    supabase
+      .from("profiles")
+      .select("id, full_name, created_at")
+      .order("created_at", { ascending: false })
+      .limit(10),
   ]);
 
-  const totalRevenue = (revenueData || []).reduce(
-    (sum, e) => sum + (e.amount_paid || 0),
-    0
-  );
+  const paid = allPaidEnrollments || [];
+  const totalRevenue = paid.reduce((s, e) => s + (e.amount_paid || 0), 0);
+  const revenueToday = paid
+    .filter((e) => e.enrolled_at && e.enrolled_at >= todayStart)
+    .reduce((s, e) => s + (e.amount_paid || 0), 0);
+  const revenueThisWeek = paid
+    .filter((e) => e.enrolled_at && e.enrolled_at >= weekAgo)
+    .reduce((s, e) => s + (e.amount_paid || 0), 0);
+  const revenueThisMonth = paid
+    .filter((e) => e.enrolled_at && e.enrolled_at >= monthStart)
+    .reduce((s, e) => s + (e.amount_paid || 0), 0);
+
+  const enrollmentsThisWeek = paid.filter(
+    (e) => e.enrolled_at && e.enrolled_at >= weekAgo
+  ).length;
+  const enrollmentsLastWeek = paid.filter(
+    (e) => e.enrolled_at && e.enrolled_at >= twoWeeksAgo && e.enrolled_at < weekAgo
+  ).length;
+
+  // Multi-course buyers
+  const userCourseCount = new Map<string, number>();
+  for (const e of paid) {
+    userCourseCount.set(e.user_id, (userCourseCount.get(e.user_id) || 0) + 1);
+  }
+  const multiCourseBuyers = [...userCourseCount.values()].filter((c) => c > 1).length;
 
   const users = totalUsers || 0;
-  const paid = paidEnrollments || 0;
+  const paidCount = paidEnrollments || 0;
+  const uniquePaidUsers = userCourseCount.size;
+  const avgRevenuePerUser = uniquePaidUsers > 0 ? Math.round(totalRevenue / uniquePaidUsers) : 0;
+
+  // Get emails for recent data
+  const serviceSupabase = (await import("@supabase/supabase-js")).createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { data: authData } = await serviceSupabase.auth.admin.listUsers({ perPage: 1000 });
+  const emailMap = new Map<string, string>();
+  for (const u of authData?.users || []) emailMap.set(u.id, u.email || "");
+
+  // Course titles
+  const courseIds = [...new Set(paid.map((e) => e.course_id))];
+  const { data: courses } = courseIds.length > 0
+    ? await supabase.from("courses").select("id, title").in("id", courseIds)
+    : { data: [] };
+  const courseMap = new Map<string, string>();
+  for (const c of courses || []) courseMap.set(c.id, c.title);
+
+  // Profile names
+  const { data: allProfiles } = await supabase.from("profiles").select("id, full_name");
+  const nameMap = new Map<string, string | null>();
+  for (const p of allProfiles || []) nameMap.set(p.id, p.full_name);
+
+  // Recent payments
+  const recentPayments: RecentPayment[] = (recentEnrollmentRows || []).map((e) => ({
+    userName: nameMap.get(e.user_id) ?? null,
+    userEmail: emailMap.get(e.user_id) || "",
+    courseTitle: courseMap.get(e.course_id) || "Unknown",
+    amount: e.amount_paid || 0,
+    status: e.status,
+    date: e.enrolled_at || e.created_at,
+  }));
+
+  // Recent signups
+  const enrolledUserIds = new Set(paid.map((e) => e.user_id));
+  const recentSignups: RecentSignup[] = (recentProfileRows || []).map((p) => ({
+    name: p.full_name,
+    email: emailMap.get(p.id) || "",
+    date: p.created_at,
+    hasEnrolled: enrolledUserIds.has(p.id),
+  }));
+
+  // Course breakdown
+  const courseRevMap = new Map<string, { enrollments: number; revenue: number }>();
+  for (const e of paid) {
+    const existing = courseRevMap.get(e.course_id) || { enrollments: 0, revenue: 0 };
+    existing.enrollments++;
+    existing.revenue += e.amount_paid || 0;
+    courseRevMap.set(e.course_id, existing);
+  }
+  const courseBreakdown: CourseBreakdownRow[] = [...courseRevMap.entries()].map(
+    ([id, data]) => ({
+      title: courseMap.get(id) || "Unknown",
+      ...data,
+    })
+  ).sort((a, b) => b.revenue - a.revenue);
 
   return {
     totalUsers: users,
-    paidEnrollments: paid,
+    paidEnrollments: paidCount,
     totalRevenue,
-    conversionRate: users > 0 ? Math.round((paid / users) * 100) : 0,
+    conversionRate: users > 0 ? Math.round((paidCount / users) * 100) : 0,
     enrollmentsThisWeek,
     enrollmentsLastWeek,
+    revenueToday,
+    revenueThisWeek,
+    revenueThisMonth,
+    failedCheckouts: failedCheckouts || 0,
+    multiCourseBuyers,
+    avgRevenuePerUser,
+    recentPayments,
+    recentSignups,
+    courseBreakdown,
   };
 }
 
