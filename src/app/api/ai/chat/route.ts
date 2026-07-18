@@ -9,6 +9,7 @@ import {
   buildQuizPrompt,
   buildGlobalSystemPrompt,
   isAiAvailable,
+  trimHistory,
   type ChatMessage,
 } from "@/lib/ai";
 
@@ -177,10 +178,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Build messages array
+    // Build messages array with trimmed history
+    const trimmedHistory = trimHistory(history);
     const messages: ChatMessage[] = [
       { role: "system", content: systemPrompt },
-      ...history,
+      ...trimmedHistory,
       { role: "user", content: message },
     ];
 
@@ -191,7 +193,7 @@ export async function POST(req: NextRequest) {
       lessonId || null,
       conversationId || null,
       messages,
-      history,
+      trimmedHistory,
       message,
       req.signal,
     );

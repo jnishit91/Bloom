@@ -97,7 +97,9 @@ export async function chatCompletion({
 
 // ── Transcript truncation ──
 
-const MAX_TRANSCRIPT_TOKENS = 100_000;
+const MAX_TRANSCRIPT_TOKENS = 1500;
+const MAX_GLOBAL_PROMPT_CHARS = 24_000;
+const MAX_HISTORY_MESSAGES = 10;
 const AVG_CHARS_PER_TOKEN = 4;
 
 export function truncateTranscript(transcript: string | null): string {
@@ -149,6 +151,11 @@ export function repairQuizJson(raw: string): unknown[] | null {
   } catch {
     return null;
   }
+}
+
+export function trimHistory(messages: ChatMessage[]): ChatMessage[] {
+  if (messages.length <= MAX_HISTORY_MESSAGES) return messages;
+  return messages.slice(-MAX_HISTORY_MESSAGES);
 }
 
 // ── System prompts ──
@@ -239,6 +246,11 @@ export function buildGlobalSystemPrompt(courseContents: CourseContent[]): string
       return `## Course: ${course.title}\n\n${lessonParts.join("\n\n")}`;
     });
     courseSection = parts.join("\n\n---\n\n");
+  }
+
+  if (courseSection.length > MAX_GLOBAL_PROMPT_CHARS) {
+    courseSection = courseSection.slice(0, MAX_GLOBAL_PROMPT_CHARS) +
+      "\n\n[... remaining content truncated to fit context limit ...]";
   }
 
   return `You are Bloom AI, a learning assistant. You answer questions ONLY based on the recording transcripts provided below. Nothing else.
