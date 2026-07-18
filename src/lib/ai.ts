@@ -35,21 +35,37 @@ export async function streamChat({
     throw new Error("AI is not configured. Set AI_BASE_URL in your environment.");
   }
 
-  const res = await fetch(`${BASE_URL}/chat/completions`, {
+  const body = JSON.stringify({
+    model: MODEL,
+    messages,
+    max_tokens: maxTokens,
+    temperature,
+    stream: true,
+  });
+
+  let res = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
     },
-    body: JSON.stringify({
-      model: MODEL,
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-      stream: true,
-    }),
+    body,
     signal,
   });
+
+  if (res.status === 429) {
+    const retryAfter = parseRetryDelay(await res.text().catch(() => ""));
+    await new Promise((r) => setTimeout(r, retryAfter));
+    res = await fetch(`${BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+      },
+      body,
+      signal,
+    });
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "Unknown error");
@@ -71,20 +87,35 @@ export async function chatCompletion({
   maxTokens = 1500,
   temperature = 0.7,
 }: Omit<StreamOptions, "signal">): Promise<string> {
-  const res = await fetch(`${BASE_URL}/chat/completions`, {
+  const body = JSON.stringify({
+    model: MODEL,
+    messages,
+    max_tokens: maxTokens,
+    temperature,
+    stream: false,
+  });
+
+  let res = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
     },
-    body: JSON.stringify({
-      model: MODEL,
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-      stream: false,
-    }),
+    body,
   });
+
+  if (res.status === 429) {
+    const retryAfter = parseRetryDelay(await res.text().catch(() => ""));
+    await new Promise((r) => setTimeout(r, retryAfter));
+    res = await fetch(`${BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+      },
+      body,
+    });
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "Unknown error");
@@ -95,11 +126,17 @@ export async function chatCompletion({
   return data.choices?.[0]?.message?.content || "";
 }
 
+function parseRetryDelay(body: string): number {
+  const match = body.match(/try again in (\d+(?:\.\d+)?)s/i);
+  if (match) return Math.ceil(parseFloat(match[1]!) * 1000) + 500;
+  return 20_000;
+}
+
 // ── Transcript truncation ──
 
-const MAX_TRANSCRIPT_TOKENS = 1500;
-const MAX_GLOBAL_PROMPT_CHARS = 24_000;
-const MAX_HISTORY_MESSAGES = 10;
+const MAX_TRANSCRIPT_TOKENS = 500;
+const MAX_GLOBAL_PROMPT_CHARS = 8_000;
+const MAX_HISTORY_MESSAGES = 6;
 const AVG_CHARS_PER_TOKEN = 4;
 
 export function truncateTranscript(transcript: string | null): string {
