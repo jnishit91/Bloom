@@ -199,7 +199,7 @@ async function whisperTranscribe(
       const waitMatch = errText.match(/try again in (\d+)m([\d.]+)s/i);
       let waitSecs = 240; // default 4 min
       if (waitMatch) {
-        waitSecs = parseInt(waitMatch[1]) * 60 + parseFloat(waitMatch[2]) + 5;
+        waitSecs = parseInt(waitMatch[1]!) * 60 + parseFloat(waitMatch[2]!) + 5;
       }
       console.log(`  ⏳ Rate limited — waiting ${Math.round(waitSecs)}s before retry...`);
       await sleep(waitSecs * 1000);
