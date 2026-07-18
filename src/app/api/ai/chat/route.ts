@@ -81,26 +81,62 @@ export async function POST(req: NextRequest) {
         lesson.description,
       );
     } else {
-      // Global Bloom AI
+      // Global Bloom AI — load full course content for enrolled courses
       const { data: enrollments } = await supabase
         .from("enrollments")
         .select("course_id")
         .eq("user_id", user.id)
         .in("status", ["active", "manual"]);
 
-      let courseNames: string[] = [];
-      if (enrollments && enrollments.length > 0) {
-        const { data: courses } = await supabase
-          .from("courses")
-          .select("title")
-          .in(
-            "id",
-            enrollments.map((e) => e.course_id),
-          );
-        courseNames = (courses || []).map((c) => c.title);
+      const enrolledCourseIds = (enrollments || []).map((e) => e.course_id);
+
+      interface CourseContent {
+        title: string;
+        lessons: { title: string; moduleTitle: string; transcript: string | null; description: string | null }[];
       }
 
-      systemPrompt = buildGlobalSystemPrompt(courseNames);
+      const courseContents: CourseContent[] = [];
+
+      if (enrolledCourseIds.length > 0) {
+        const { data: courses } = await supabase
+          .from("courses")
+          .select("id, title")
+          .in("id", enrolledCourseIds);
+
+        for (const course of courses || []) {
+          const { data: modules } = await supabase
+            .from("modules")
+            .select("id, title, sort_order")
+            .eq("course_id", course.id)
+            .order("sort_order");
+
+          const moduleIds = (modules || []).map((m) => m.id);
+          if (moduleIds.length === 0) {
+            courseContents.push({ title: course.title, lessons: [] });
+            continue;
+          }
+
+          const { data: lessons } = await supabase
+            .from("lessons")
+            .select("title, description, transcript, module_id, sort_order")
+            .in("module_id", moduleIds)
+            .order("sort_order");
+
+          const moduleMap = new Map((modules || []).map((m) => [m.id, m.title]));
+
+          courseContents.push({
+            title: course.title,
+            lessons: (lessons || []).map((l) => ({
+              title: l.title,
+              moduleTitle: moduleMap.get(l.module_id) || "",
+              transcript: l.transcript,
+              description: l.description,
+            })),
+          });
+        }
+      }
+
+      systemPrompt = buildGlobalSystemPrompt(courseContents);
     }
 
     // ── Quiz mode: non-streaming JSON ──
@@ -173,9 +209,30 @@ async function handleQuiz(
   lessonId: string | undefined,
   systemPrompt: string,
 ) {
+  // Load previously asked questions so we don't repeat
+  let previousQuestions: string[] = [];
+  if (lessonId) {
+    const { data: pastAttempts } = await supabase
+      .from("quiz_attempts")
+      .select("questions")
+      .eq("user_id", userId)
+      .eq("lesson_id", lessonId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (pastAttempts) {
+      for (const attempt of pastAttempts) {
+        const qs = attempt.questions as { question: string }[];
+        if (Array.isArray(qs)) {
+          previousQuestions.push(...qs.map((q) => q.question));
+        }
+      }
+    }
+  }
+
   const messages: ChatMessage[] = [
     { role: "system", content: systemPrompt },
-    { role: "user", content: buildQuizPrompt() },
+    { role: "user", content: buildQuizPrompt(previousQuestions) },
   ];
 
   // Try up to 2 times
@@ -183,7 +240,7 @@ async function handleQuiz(
     const raw = await chatCompletion({
       messages,
       maxTokens: 2000,
-      temperature: 0.2,
+      temperature: 0.6,
     });
 
     const questions = repairQuizJson(raw);
@@ -306,7 +363,7 @@ async function handleChatStream(
 ) {
   const upstream = await streamChat({
     messages,
-    maxTokens: 1500,
+    maxTokens: 3000,
     temperature: 0.7,
     signal,
   });

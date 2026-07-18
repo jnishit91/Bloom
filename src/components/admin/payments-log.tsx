@@ -25,7 +25,6 @@ const statusColors: Record<string, string> = {
   manual: "bg-sage/15 text-sage-dark",
   pending: "bg-dawn-gold/15 text-dawn-gold-dark",
   failed: "bg-destructive/10 text-destructive",
-  refunded: "bg-muted text-muted-foreground",
 };
 
 export function PaymentsLog({ payments }: { payments: Payment[] }) {
@@ -79,7 +78,6 @@ export function PaymentsLog({ payments }: { payments: Payment[] }) {
             <option value="manual">Manual</option>
             <option value="pending">Pending</option>
             <option value="failed">Failed</option>
-            <option value="refunded">Refunded</option>
           </select>
           <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
         </div>

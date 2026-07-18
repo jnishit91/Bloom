@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck } from "lucide-react";
+import { ORIGINAL_PRICE } from "@/lib/offer";
 
 declare global {
   interface Window {
@@ -135,7 +136,7 @@ export function CheckoutButton({
           </>
         ) : (
           <>
-            Enroll Now — ₹{priceInr.toLocaleString("en-IN")}
+            Enroll Now — <span className="line-through opacity-60 mr-1">₹{ORIGINAL_PRICE.toLocaleString("en-IN")}</span> ₹{priceInr.toLocaleString("en-IN")}
           </>
         )}
       </Button>

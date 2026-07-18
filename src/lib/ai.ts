@@ -97,13 +97,9 @@ export async function chatCompletion({
 
 // ── Transcript truncation ──
 
-const MAX_TRANSCRIPT_TOKENS = 6000;
+const MAX_TRANSCRIPT_TOKENS = 100_000;
 const AVG_CHARS_PER_TOKEN = 4;
 
-/**
- * Truncates transcript to ~6K tokens using middle-cut strategy:
- * keeps the first third and last third, replaces middle with "[...]".
- */
 export function truncateTranscript(transcript: string | null): string {
   if (!transcript) return "";
 
@@ -166,19 +162,20 @@ export function buildLessonSystemPrompt(
 ): string {
   const context = truncateTranscript(transcript) || description || "No content available.";
 
-  return `You are Bloom AI, a warm and knowledgeable learning assistant for the "${courseTitle}" course on Bloom, a relationship-transformation platform.
+  return `You are Bloom AI, a learning assistant. You answer questions ONLY based on the recording transcript provided below. Nothing else.
 
-Current lesson: "${lessonTitle}" (Module: "${moduleTitle}")
-
-Lesson content:
+RECORDING TRANSCRIPT:
 ${context}
 
-Guidelines:
-- Be warm, encouraging, and concise
-- Ground all answers in the lesson content above
-- Use simple, clear language accessible to Indian English speakers
-- If asked something outside the lesson scope, acknowledge it and gently redirect to the lesson material
-- Never make up facts not present in the lesson content`;
+STRICT RULES:
+- You ONLY know what is written in the transcript above. That is your ENTIRE knowledge base.
+- Do NOT use the course name, lesson title, or module title to guess or infer anything. Ignore them completely when forming answers.
+- Do NOT draw on any general knowledge about relationships, psychology, counselling, or any other topic. You are NOT a relationship expert — you are a transcript assistant.
+- If the answer to a question is NOT in the transcript, say: "I couldn't find information about that in this recording. Could you point me to which part you're referring to?"
+- Quote or closely paraphrase the exact words from the transcript when answering
+- If the user asks "what are they talking about", summarize what the speakers actually said in the transcript — do not generalize
+- Be warm and helpful, but NEVER fabricate, assume, or fill in gaps with outside knowledge
+- Use simple, clear language accessible to Indian English speakers`;
 }
 
 export function buildSummarizePrompt(): string {
@@ -196,8 +193,12 @@ export function buildSummarizePrompt(): string {
 Keep the total response under 300 words. Be specific to the lesson content.`;
 }
 
-export function buildQuizPrompt(): string {
-  return `Generate exactly 5 multiple-choice questions based on this lesson's content.
+export function buildQuizPrompt(previousQuestions: string[] = []): string {
+  const avoidSection = previousQuestions.length > 0
+    ? `\n\nIMPORTANT — The user has already been asked these questions in previous quizzes. Do NOT repeat or rephrase any of them. Generate completely NEW questions on DIFFERENT aspects of the lesson:\n${previousQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
+    : "";
+
+  return `Generate exactly 5 multiple-choice questions based ONLY on what is said in the recording transcript above. Do NOT use any outside knowledge.
 
 Respond with ONLY a JSON array, no other text. Each object must have exactly these fields:
 [
@@ -205,34 +206,53 @@ Respond with ONLY a JSON array, no other text. Each object must have exactly the
     "question": "The question text",
     "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
     "correct": 0,
-    "explanation": "Brief explanation of why this answer is correct"
+    "explanation": "Brief explanation quoting or paraphrasing the specific part of the transcript where this was covered"
   }
 ]
 
 Rules:
 - "correct" is the 0-based index of the correct option (0-3)
-- Questions should test understanding, not just recall
-- All 4 options should be plausible
-- Keep questions and explanations concise`;
+- Every question MUST come directly from what the speakers said in the transcript — use their exact words, examples, and points
+- Do NOT ask generic questions that someone could answer without listening to the recording
+- Questions should test whether the user actually paid attention to the recording: what was said, what examples were given, what advice or insights the speakers shared
+- All 4 options should be plausible — wrong options should be realistic misunderstandings of what was said, not obviously wrong
+- Explanations must quote or paraphrase the exact part of the transcript that contains the answer
+- Vary the difficulty: some detail-oriented, some about the bigger points made${avoidSection}`;
 }
 
-export function buildGlobalSystemPrompt(enrolledCourses: string[]): string {
-  const courseList = enrolledCourses.length > 0
-    ? `The user is enrolled in: ${enrolledCourses.join(", ")}.`
-    : "The user hasn't enrolled in any courses yet.";
+interface CourseContent {
+  title: string;
+  lessons: { title: string; moduleTitle: string; transcript: string | null; description: string | null }[];
+}
 
-  return `You are Bloom AI, a warm and supportive learning companion on Bloom, a relationship-transformation platform based in India.
+export function buildGlobalSystemPrompt(courseContents: CourseContent[]): string {
+  let courseSection: string;
 
-${courseList}
+  if (courseContents.length === 0) {
+    courseSection = "The user hasn't enrolled in any courses yet.";
+  } else {
+    const parts = courseContents.map((course) => {
+      const lessonParts = course.lessons.map((lesson) => {
+        const content = truncateTranscript(lesson.transcript) || lesson.description || "";
+        return `### ${lesson.moduleTitle} → ${lesson.title}\n${content}`;
+      });
+      return `## Course: ${course.title}\n\n${lessonParts.join("\n\n")}`;
+    });
+    courseSection = parts.join("\n\n---\n\n");
+  }
 
-You help users with:
-- Questions about their courses and learning journey
-- Relationship growth insights and encouragement
-- Navigating the Bloom platform
+  return `You are Bloom AI, a learning assistant. You answer questions ONLY based on the recording transcripts provided below. Nothing else.
 
-Guidelines:
-- Be warm, encouraging, and concise
-- Use simple, clear language
-- You don't have access to specific lesson content in this mode — suggest the user ask from within a lesson for content-specific questions
-- Never give medical, legal, or crisis advice — gently suggest professional help when appropriate`;
+ALL RECORDING TRANSCRIPTS:
+${courseSection}
+
+STRICT RULES:
+- You ONLY know what is written in the transcripts above. That is your ENTIRE knowledge base.
+- Do NOT use course names, lesson titles, or module titles to guess or infer anything. Ignore them completely when forming answers.
+- Do NOT draw on any general knowledge about relationships, psychology, counselling, or any other topic. You are NOT an expert on anything — you are a transcript assistant.
+- If the answer to a question is NOT in any transcript, say: "I couldn't find information about that in the recordings. Could you ask about something specific from one of the lessons?"
+- Quote or closely paraphrase the exact words from the transcripts when answering
+- When the user asks about a topic, search across ALL transcripts and pull out exactly what was said
+- Be warm and helpful, but NEVER fabricate, assume, or fill in gaps with outside knowledge
+- Use simple, clear language accessible to Indian English speakers`;
 }

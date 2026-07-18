@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BookOpen, Clock, User } from "lucide-react";
+import { OfferPriceBlock } from "@/components/commerce/offer-price";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -85,12 +86,7 @@ export default async function CoursesPage() {
                   </div>
                   {!isDraft && (
                     <div className="pt-2 border-t border-border">
-                      <span className="font-semibold text-botanical text-lg">
-                        ₹{course.price_inr.toLocaleString("en-IN")}
-                      </span>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        Lifetime access
-                      </span>
+                      <OfferPriceBlock />
                     </div>
                   )}
                 </div>

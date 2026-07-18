@@ -14,6 +14,8 @@ import {
   Zap,
   ArrowRight,
 } from "lucide-react";
+import { OfferPriceInline, OfferPriceHero } from "@/components/commerce/offer-price";
+import { ORIGINAL_PRICE, OFFER_PRICE } from "@/lib/offer";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -77,7 +79,8 @@ export default async function HomePage() {
               </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              Every course ₹5,000 · Lifetime access · AI-powered learning
+              <span className="line-through text-muted-foreground/70">₹{ORIGINAL_PRICE.toLocaleString("en-IN")}</span>{" "}
+              <span className="font-semibold">₹{OFFER_PRICE.toLocaleString("en-IN")}</span> · Lifetime access · AI-powered learning
             </p>
           </div>
         </div>
@@ -129,9 +132,7 @@ export default async function HomePage() {
                       <span className="text-sm text-muted-foreground">
                         {course.total_weeks} weeks · {course.total_lessons} lessons
                       </span>
-                      <span className="font-semibold text-botanical">
-                        ₹{course.price_inr.toLocaleString("en-IN")}
-                      </span>
+                      <OfferPriceInline />
                     </div>
                   </div>
                 </Link>
@@ -281,9 +282,7 @@ export default async function HomePage() {
             <p className="text-white/60 text-sm uppercase tracking-wider font-medium">
               Every course
             </p>
-            <p className="font-display text-5xl mt-2">
-              ₹5,000
-            </p>
+            <OfferPriceHero />
             <p className="text-white/60 mt-2 text-sm">
               GST inclusive · Lifetime access
             </p>
@@ -338,10 +337,6 @@ export default async function HomePage() {
               {
                 q: "Is this therapy?",
                 a: "No. Bloom courses are educational, not therapeutic. They're designed by relationship experts, but if you're in crisis, we always recommend working with a licensed professional.",
-              },
-              {
-                q: "Can I get a refund?",
-                a: "If you're not satisfied within 7 days of purchase and haven't completed more than 20% of the course, contact us for a full refund.",
               },
             ].map((faq, i) => (
               <details

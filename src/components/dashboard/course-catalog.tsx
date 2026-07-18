@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ORIGINAL_PRICE, OFFER_PRICE } from "@/lib/offer";
 
 interface CatalogCourse {
   id: string;
@@ -113,7 +114,13 @@ function CatalogCard({ course }: { course: CatalogCourse }) {
         )}
         <p className="text-sm text-muted-foreground">
           {course.total_weeks} weeks · {course.total_lessons} lessons
-          {!isDraft && <span className="text-botanical font-semibold"> · ₹{course.price_inr.toLocaleString("en-IN")}</span>}
+          {!isDraft && (
+            <>
+              {" · "}
+              <span className="line-through text-muted-foreground">₹{ORIGINAL_PRICE.toLocaleString("en-IN")}</span>{" "}
+              <span className="text-botanical font-semibold">₹{OFFER_PRICE.toLocaleString("en-IN")}</span>
+            </>
+          )}
         </p>
       </div>
     </Link>

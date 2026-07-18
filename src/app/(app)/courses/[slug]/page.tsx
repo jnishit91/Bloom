@@ -15,6 +15,7 @@ import {
   Lock,
 } from "lucide-react";
 import type { Metadata } from "next";
+import { OfferPriceBlock } from "@/components/commerce/offer-price";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -312,7 +313,7 @@ export default async function CourseSalesPage({ params }: PageProps) {
             {[
               "The depth of this course surprised me. It's not surface-level advice — it's real inner work that changes how you show up.",
               "I was sceptical about an online course for relationships, but the AI assistant and structured reflections made all the difference.",
-              "Best ₹5,000 I've ever spent. The workbooks alone are worth it. My communication has completely transformed.",
+              "Best investment I've ever made. The workbooks alone are worth it. My communication has completely transformed.",
             ].map((quote, i) => (
               <div key={i} className="rounded-bloom-sm bg-ivory p-5 border border-border space-y-3">
                 <div className="flex gap-0.5">
@@ -333,12 +334,7 @@ export default async function CourseSalesPage({ params }: PageProps) {
       {!isEnrolled && (
         <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white border-t border-border px-4 py-3 shadow-bloom-lg">
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="font-semibold text-botanical">
-                ₹{course.price_inr.toLocaleString("en-IN")}
-              </p>
-              <p className="text-xs text-muted-foreground">Lifetime access</p>
-            </div>
+            <OfferPriceBlock />
             <CheckoutButton
               courseId={course.id}
               courseSlug={course.slug}
@@ -353,12 +349,7 @@ export default async function CourseSalesPage({ params }: PageProps) {
       {!isEnrolled && (
         <div className="hidden lg:block fixed bottom-8 right-8 z-40">
           <div className="rounded-bloom bg-white border border-border shadow-bloom-lg p-5 w-72">
-            <p className="font-display text-2xl text-botanical">
-              ₹{course.price_inr.toLocaleString("en-IN")}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1 mb-4">
-              One-time payment · Lifetime access
-            </p>
+            <OfferPriceBlock className="mb-4" />
             <CheckoutButton
               courseId={course.id}
               courseSlug={course.slug}
