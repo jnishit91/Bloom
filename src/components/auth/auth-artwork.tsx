@@ -11,16 +11,20 @@ export function BloomPetal({
 }) {
   const rotation = (360 / total) * index;
   return (
-    <ellipse
-      cx={size / 2}
-      cy={size / 4}
-      rx={size / 8}
-      ry={size / 3.5}
-      fill="rgba(255,255,255,0.15)"
-      transform={`rotate(${rotation} ${size / 2} ${size / 2})`}
-      className="animate-petal-unfurl"
-      style={{ animationDelay: `${index * 0.12}s` }}
-    />
+    <g transform={`rotate(${rotation} ${size / 2} ${size / 2})`}>
+      <ellipse
+        cx={size / 2}
+        cy={size / 4}
+        rx={size / 8}
+        ry={size / 3.5}
+        fill="rgba(255,255,255,0.15)"
+        className="animate-petal-unfurl"
+        style={{
+          animationDelay: `${index * 0.12}s`,
+          transformOrigin: `${size / 2}px ${size / 2}px`,
+        }}
+      />
+    </g>
   );
 }
 
