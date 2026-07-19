@@ -6,7 +6,6 @@ import {
   BookOpen,
   Users,
   Heart,
-  MessageCircle,
   ChevronRight,
   Play,
   Shield,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { OfferPriceInline, OfferPriceHero } from "@/components/commerce/offer-price";
 import { ORIGINAL_PRICE, OFFER_PRICE } from "@/lib/offer";
+import { TestimonialTicker } from "@/components/landing/testimonial-ticker";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -227,46 +227,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials — vertical auto-scrolling ticker */}
       <section className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-display text-3xl sm:text-4xl text-botanical text-center mb-12">
             What our members say
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                quote: "I finally understand why I kept repeating the same patterns. This course gave me the tools to break free and love differently.",
-                name: "Priya K.",
-                detail: "The Art of Conscious Love",
-              },
-              {
-                quote: "The AI assistant is incredible — it's like having a wise mentor available 24/7. I could ask questions and get clarity instantly.",
-                name: "Arjun M.",
-                detail: "Week 2 was life-changing",
-              },
-              {
-                quote: "Worth every rupee. The quality is better than courses I've paid 10x for. My partner and I are communicating better than ever.",
-                name: "Sneha R.",
-                detail: "Enrolled as a couple",
-              },
-            ].map((t, i) => (
-              <div
-                key={i}
-                className="rounded-bloom bg-ivory p-6 space-y-4 border border-border"
-              >
-                <MessageCircle className="size-5 text-bloom-rose/40" />
-                <p className="text-botanical text-sm leading-relaxed italic">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div>
-                  <p className="text-sm font-medium text-botanical">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.detail}</p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
+        <TestimonialTicker />
       </section>
 
       {/* Pricing */}
