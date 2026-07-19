@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { MessageCircle } from "lucide-react";
+
+const AVATAR_COLORS = [
+  "bg-bloom-rose",
+  "bg-sage",
+  "bg-dawn-gold",
+  "bg-bloom-rose-light",
+  "bg-sage-light",
+  "bg-dawn-gold-light",
+  "bg-bloom-rose-dark",
+  "bg-sage-dark",
+  "bg-dawn-gold-dark",
+];
 
 const testimonials = [
   {
@@ -60,27 +71,45 @@ const testimonials = [
   },
 ];
 
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 function TestimonialCard({
   quote,
   name,
   detail,
+  index,
 }: {
   quote: string;
   name: string;
   detail: string;
+  index: number;
 }) {
+  const initials = getInitials(name);
+  const colorClass = AVATAR_COLORS[index % AVATAR_COLORS.length];
+
   return (
     <div className="rounded-bloom bg-ivory p-5 border border-border space-y-3 flex-shrink-0">
-      <div className="flex items-center gap-2">
-        <MessageCircle className="size-4 text-bloom-rose/40" />
-        <span className="text-xs text-dawn-gold">★★★★★</span>
-      </div>
+      <span className="text-sm text-dawn-gold tracking-wider">★★★★★</span>
       <p className="text-botanical text-sm leading-relaxed italic">
         &ldquo;{quote}&rdquo;
       </p>
-      <div>
-        <p className="text-sm font-medium text-botanical">{name}</p>
-        <p className="text-xs text-muted-foreground">{detail}</p>
+      <div className="flex items-center gap-2.5">
+        <div
+          className={`w-8 h-8 rounded-full ${colorClass} flex items-center justify-center text-white text-xs font-semibold flex-shrink-0`}
+        >
+          {initials}
+        </div>
+        <div>
+          <p className="text-sm font-medium text-botanical">{name}</p>
+          <p className="text-xs text-muted-foreground">{detail}</p>
+        </div>
       </div>
     </div>
   );
@@ -125,9 +154,8 @@ function TickerColumn({
           animation: `ticker-${direction} ${duration}s linear infinite`,
         }}
       >
-        {/* Duplicate items for seamless loop */}
         {[...items, ...items].map((t, i) => (
-          <TestimonialCard key={i} {...t} />
+          <TestimonialCard key={i} {...t} index={i} />
         ))}
       </div>
     </div>
