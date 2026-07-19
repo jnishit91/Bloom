@@ -3,15 +3,15 @@
 import { useEffect, useRef } from "react";
 
 const AVATAR_COLORS = [
-  "bg-bloom-rose",
-  "bg-sage",
-  "bg-dawn-gold",
-  "bg-bloom-rose-light",
-  "bg-sage-light",
-  "bg-dawn-gold-light",
-  "bg-bloom-rose-dark",
-  "bg-sage-dark",
-  "bg-dawn-gold-dark",
+  "#E75D7C",
+  "#8FAE94",
+  "#E8A94F",
+  "#F0899F",
+  "#6E8E73",
+  "#D4923A",
+  "#D04466",
+  "#A8C4AC",
+  "#F0C278",
 ];
 
 const testimonials = [
@@ -92,17 +92,18 @@ function TestimonialCard({
   index: number;
 }) {
   const initials = getInitials(name);
-  const colorClass = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  const bgColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
 
   return (
     <div className="rounded-bloom bg-ivory p-5 border border-border space-y-3 flex-shrink-0">
-      <span className="text-sm text-dawn-gold tracking-wider">★★★★★</span>
+      <span className="text-sm tracking-wider" style={{ color: "#E8A94F" }}>★★★★★</span>
       <p className="text-botanical text-sm leading-relaxed italic">
         &ldquo;{quote}&rdquo;
       </p>
       <div className="flex items-center gap-2.5">
         <div
-          className={`w-8 h-8 rounded-full ${colorClass} flex items-center justify-center text-white text-xs font-semibold flex-shrink-0`}
+          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
+          style={{ backgroundColor: bgColor }}
         >
           {initials}
         </div>
