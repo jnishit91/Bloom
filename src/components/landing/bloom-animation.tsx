@@ -19,9 +19,9 @@ function mix(a: number, b: number, t: number) { return a + (b - a) * t; }
 function clamp01(v: number) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
 const WORDS: [number, number, number, number, string][] = [
-  [0.48, 0.53, 0.56, 0.60, 'Relationships'],
-  [0.61, 0.66, 0.69, 0.73, 'Friendships'],
-  [0.74, 0.79, 0.82, 0.86, 'Love'],
+  [0.48, 0.53, 0.56, 0.62, 'Relationships'],
+  [0.59, 0.64, 0.69, 0.75, 'Friendships'],
+  [0.72, 0.77, 0.82, 0.86, 'Love'],
 ];
 
 export function BloomAnimation() {
@@ -31,7 +31,7 @@ export function BloomAnimation() {
   const glowRef = useRef<HTMLDivElement>(null);
   const bloomRef = useRef<HTMLSpanElement>(null);
   const ingRef = useRef<HTMLSpanElement>(null);
-  const suffixRef = useRef<HTMLSpanElement>(null);
+  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const navCacheRef = useRef<{ cx: number; cy: number; h: number } | null>(null);
 
   const getMax = useCallback(() => {
@@ -130,25 +130,18 @@ export function BloomAnimation() {
         else ingRef.current.style.visibility = 'visible';
       }
 
-      // ── Phase 3: Suffix word cycling (smoother crossfade) ──
-      let suffixOp = 0;
-      let suffixY = 10;
-      let currentWord = '';
-      for (const [fis, fie, fos, foe, word] of WORDS) {
-        if (p >= fis - 0.02 && p < foe + 0.02) {
-          const inT = easeInOut(clamp01((p - fis) / (fie - fis)));
-          const outT = p >= fos ? easeInOut(clamp01((p - fos) / (foe - fos))) : 0;
-          suffixOp = inT * (1 - outT);
-          suffixY = mix(6, 0, inT);
-          currentWord = word;
-          break;
-        }
-      }
-      if (suffixRef.current) {
-        if (currentWord) suffixRef.current.textContent = currentWord;
-        suffixRef.current.style.opacity = String(suffixOp);
-        suffixRef.current.style.transform = `translateY(${suffixY}px)`;
-        suffixRef.current.style.visibility = suffixOp < 0.01 ? 'hidden' : 'visible';
+      // ── Phase 3: Suffix word cycling (each word has its own element for smooth crossfade) ──
+      for (let wi = 0; wi < WORDS.length; wi++) {
+        const el = wordRefs.current[wi];
+        if (!el) continue;
+        const [fis, fie, fos, foe] = WORDS[wi]!;
+        const inT = easeInOut(clamp01((p - fis) / (fie - fis)));
+        const outT = p >= fos ? easeInOut(clamp01((p - fos) / (foe - fos))) : 0;
+        const op = inT * (1 - outT);
+        const y = mix(6, 0, inT);
+        el.style.opacity = String(op);
+        el.style.transform = `translateY(${y}px)`;
+        el.style.visibility = op < 0.01 ? 'hidden' : 'visible';
       }
 
       // ── Phase 4: Logo moves to nav (0.89 → 0.96) ──
@@ -251,11 +244,18 @@ export function BloomAnimation() {
                 ing
               </span>
             </div>
-            <span
-              ref={suffixRef}
-              className="font-display text-lg sm:text-2xl lg:text-4xl font-medium sm:ml-4 mt-1 sm:mt-0 opacity-0 invisible"
-              style={{ color: '#9C9890' }}
-            />
+            <span className="relative sm:ml-4 mt-1 sm:mt-0">
+              {WORDS.map(([,,,, word], i) => (
+                <span
+                  key={word}
+                  ref={(el) => { wordRefs.current[i] = el; }}
+                  className="font-display text-lg sm:text-2xl lg:text-4xl font-medium opacity-0 invisible absolute left-0 top-0 whitespace-nowrap first:relative"
+                  style={{ color: '#9C9890' }}
+                >
+                  {word}
+                </span>
+              ))}
+            </span>
           </div>
         </div>
         </div>
