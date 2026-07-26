@@ -12,10 +12,13 @@ import {
   Star,
   Zap,
   ArrowRight,
+  CheckCircle2,
 } from "lucide-react";
 import { OfferPriceInline, OfferPriceHero } from "@/components/commerce/offer-price";
 import { ORIGINAL_PRICE, OFFER_PRICE } from "@/lib/offer";
 import { TestimonialTicker } from "@/components/landing/testimonial-ticker";
+import { BloomAnimation } from "@/components/landing/bloom-animation";
+import { FadeIn } from "@/components/landing/fade-in";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -34,8 +37,10 @@ export default async function HomePage() {
       <header className="sticky top-0 z-50 w-full border-b border-border bg-ivory/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2">
-            <BloomIcon />
-            <span className="font-display text-xl text-botanical">Bloom</span>
+            <span id="nav-bloom-logo" className="flex items-center gap-2">
+              <BloomIcon />
+              <span className="font-display text-xl text-botanical">Bloom</span>
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <Link href="/login">
@@ -52,19 +57,19 @@ export default async function HomePage() {
       <section className="relative overflow-hidden bg-dawn-gradient-subtle">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-bloom-rose/10 text-bloom-rose text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-bloom-rose/10 text-bloom-rose text-sm font-medium mb-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
               <Sparkles className="size-4" />
               Transform your relationships
             </div>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-botanical tracking-tight leading-[1.1]">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-botanical tracking-tight leading-[1.1] opacity-0 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
               Love better.{" "}
               <span className="text-bloom-rose">Heal deeper.</span>{" "}
               Grow together.
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-in-up" style={{ animationDelay: '0.55s', animationFillMode: 'forwards' }}>
               Premium courses that guide you through the inner work of relationships — communication, healing, intimacy, and becoming your highest self.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.75s', animationFillMode: 'forwards' }}>
               <Link href="/courses">
                 <Button size="lg" className="gap-2 text-base px-8">
                   Explore Courses
@@ -78,7 +83,7 @@ export default async function HomePage() {
                 </Button>
               </Link>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-muted-foreground opacity-0 animate-fade-in-up" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
               <span className="line-through text-muted-foreground/70">₹{ORIGINAL_PRICE.toLocaleString("en-IN")}</span>{" "}
               <span className="font-semibold">₹{OFFER_PRICE.toLocaleString("en-IN")}</span> · Lifetime access · AI-powered learning
             </p>
@@ -90,201 +95,243 @@ export default async function HomePage() {
         <div className="absolute bottom-10 right-10 w-60 h-60 rounded-full bg-dawn-gold/5 blur-3xl" />
       </section>
 
+      {/* Bloom Scroll Animation */}
+      <BloomAnimation />
+
       {/* Featured Courses */}
       {courses && courses.length > 0 && (
-        <section className="py-20 bg-ivory">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="font-display text-3xl sm:text-4xl text-botanical">
+        <section className="relative py-24 bg-ivory overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-bloom-rose/[0.03] blur-3xl -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-dawn-gold/[0.04] blur-3xl translate-y-1/3 -translate-x-1/4" />
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+            <FadeIn className="text-center mb-14">
+              <p className="text-sm font-medium text-bloom-rose tracking-wider uppercase mb-3">Explore</p>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-botanical">
                 Courses that change lives
               </h2>
-              <p className="mt-3 text-muted-foreground text-lg max-w-xl mx-auto">
+              <p className="mt-4 text-muted-foreground text-lg max-w-xl mx-auto">
                 Each course is a guided transformation — not just information, but real inner work.
               </p>
-            </div>
+            </FadeIn>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {courses.map((course) => (
-                <Link
-                  key={course.id}
-                  href={`/courses/${course.slug}`}
-                  className="group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom transition-all duration-200"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    {course.cover_image_url ? (
-                      <div
-                        className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
-                        style={{ backgroundImage: `url(${course.cover_image_url})` }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-dawn-gradient group-hover:scale-105 transition-transform duration-300" />
-                    )}
-                  </div>
-                  <div className="p-6 space-y-3">
-                    <h3 className="font-display text-xl text-botanical leading-snug">
-                      {course.title}
-                    </h3>
-                    {course.subtitle && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {course.subtitle}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-sm text-muted-foreground">
-                        {course.total_weeks} weeks · {course.total_lessons} lessons
-                      </span>
-                      <OfferPriceInline />
+              {courses.map((course, i) => (
+                <FadeIn key={course.id} delay={i * 150}>
+                  <Link
+                    href={`/courses/${course.slug}`}
+                    className="group block rounded-bloom-lg bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom-lg hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      {course.cover_image_url ? (
+                        <div
+                          className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                          style={{ backgroundImage: `url(${course.cover_image_url})` }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-dawn-gradient group-hover:scale-105 transition-transform duration-500" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
-                  </div>
-                </Link>
+                    <div className="p-6 space-y-3">
+                      <h3 className="font-display text-xl text-botanical leading-snug group-hover:text-bloom-rose transition-colors duration-200">
+                        {course.title}
+                      </h3>
+                      {course.subtitle && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {course.subtitle}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                        <span className="text-sm text-muted-foreground">
+                          {course.total_weeks} weeks · {course.total_lessons} lessons
+                        </span>
+                        <OfferPriceInline />
+                      </div>
+                    </div>
+                  </Link>
+                </FadeIn>
               ))}
             </div>
-            <div className="text-center mt-10">
+            <FadeIn className="text-center mt-12" delay={450}>
               <Link href="/courses">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" size="lg" className="gap-2 text-base">
                   View All Courses
                   <ChevronRight className="size-4" />
                 </Button>
               </Link>
-            </div>
+            </FadeIn>
           </div>
         </section>
       )}
 
       {/* How It Works */}
-      <section className="py-20 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="font-display text-3xl sm:text-4xl text-botanical">
+      <section className="relative py-24 bg-white overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(143,174,148,0.05)_0%,transparent_50%)]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+          <FadeIn className="text-center mb-16">
+            <p className="text-sm font-medium text-sage tracking-wider uppercase mb-3">Your Journey</p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-botanical">
               How Bloom works
             </h2>
-            <p className="mt-3 text-muted-foreground text-lg">
+            <p className="mt-4 text-muted-foreground text-lg">
               A simple path to deeper relationships
             </p>
-          </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          </FadeIn>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 icon: BookOpen,
                 title: "Choose your course",
                 desc: "Pick the relationship area you want to transform. Each course is 4 weeks of guided inner work.",
+                accent: "bg-bloom-rose/10 text-bloom-rose",
               },
               {
                 icon: Play,
                 title: "Watch & learn",
                 desc: "Expert-led video lessons with real stories, practical frameworks, and exercises that shift how you relate.",
+                accent: "bg-dawn-gold/10 text-dawn-gold",
               },
               {
                 icon: Sparkles,
                 title: "Get AI support",
                 desc: "Bloom AI summarises lessons, quizzes you, and answers your questions — like a wise friend who's always there.",
+                accent: "bg-sage/10 text-sage",
               },
               {
                 icon: Heart,
                 title: "Transform",
                 desc: "Complete reflections, journal prompts, and workbooks. Watch your relationships — and yourself — bloom.",
+                accent: "bg-bloom-rose/10 text-bloom-rose",
               },
             ].map((step, i) => (
-              <div key={i} className="text-center space-y-3">
-                <div className="w-14 h-14 mx-auto rounded-2xl bg-bloom-rose/10 flex items-center justify-center">
-                  <step.icon className="size-6 text-bloom-rose" />
+              <FadeIn key={i} delay={i * 120}>
+                <div className="group relative text-center space-y-4 p-6 rounded-bloom bg-ivory/50 border border-transparent hover:border-border hover:bg-white hover:shadow-bloom transition-all duration-300">
+                  <div className="text-xs font-semibold text-muted-foreground/50 tracking-widest uppercase">Step {i + 1}</div>
+                  <div className={`w-14 h-14 mx-auto rounded-2xl ${step.accent} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <step.icon className="size-6" />
+                  </div>
+                  <h3 className="font-display text-lg text-botanical">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
-                <h3 className="font-display text-lg text-botanical">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-              </div>
+              </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
       {/* Facilitator / Credibility */}
-      <section className="py-20 bg-ivory">
+      <section className="relative py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #FAF6EF 0%, #FFF8ED 50%, #FFF0F3 100%)' }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-full bg-dawn-gradient flex items-center justify-center">
-              <Users className="size-8 text-white" />
-            </div>
-            <h2 className="font-display text-3xl sm:text-4xl text-botanical">
-              Created by relationship experts
-            </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              Every Bloom course is designed by experienced facilitators who have spent years helping couples and individuals navigate the complexities of love, healing, and intimacy. This isn&apos;t generic advice — it&apos;s structured transformation.
-            </p>
-            <div className="flex items-center justify-center gap-8 pt-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Shield className="size-4 text-sage" />
-                Evidence-based methods
+          <div className="max-w-4xl mx-auto">
+            <FadeIn>
+              <div className="relative rounded-bloom-lg bg-white/70 backdrop-blur-sm border border-border/50 p-10 sm:p-14 text-center shadow-bloom">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+                  <div className="w-12 h-12 rounded-full bg-dawn-gradient flex items-center justify-center shadow-bloom">
+                    <Users className="size-5 text-white" />
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-dawn-gold tracking-wider uppercase mb-4 mt-2">Why Bloom</p>
+                <h2 className="font-display text-3xl sm:text-4xl text-botanical">
+                  Created by relationship experts
+                </h2>
+                <p className="mt-5 text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
+                  Every Bloom course is designed by experienced facilitators who have spent years helping couples and individuals navigate the complexities of love, healing, and intimacy. This isn&apos;t generic advice — it&apos;s structured transformation.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 pt-8 mt-8 border-t border-border/50">
+                  {[
+                    { icon: Shield, label: "Evidence-based methods", color: "text-sage" },
+                    { icon: Star, label: "Practitioner-designed", color: "text-dawn-gold" },
+                    { icon: Zap, label: "AI-enhanced learning", color: "text-bloom-rose" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <item.icon className={`size-4 ${item.color}`} />
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Star className="size-4 text-dawn-gold" />
-                Practitioner-designed
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="size-4 text-bloom-rose" />
-                AI-enhanced learning
-              </div>
-            </div>
+            </FadeIn>
           </div>
         </div>
       </section>
 
-      {/* Testimonials — vertical auto-scrolling ticker */}
-      <section className="py-20 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-3xl sm:text-4xl text-botanical text-center mb-12">
-            What our members say
-          </h2>
+      {/* Testimonials */}
+      <section className="relative py-24 bg-white overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-bloom-rose/[0.02] blur-3xl" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+          <FadeIn className="text-center mb-14">
+            <p className="text-sm font-medium text-bloom-rose tracking-wider uppercase mb-3">Testimonials</p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-botanical">
+              What our members say
+            </h2>
+          </FadeIn>
         </div>
-        <TestimonialTicker />
+        <FadeIn>
+          <TestimonialTicker />
+        </FadeIn>
       </section>
 
       {/* Pricing */}
-      <section className="py-20 bg-botanical text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl sm:text-4xl">
-            Simple, honest pricing
-          </h2>
-          <p className="mt-4 text-white/70 text-lg max-w-xl mx-auto">
-            No subscriptions. No hidden fees. One payment, lifetime access.
-          </p>
-          <div className="mt-10 max-w-sm mx-auto rounded-bloom-lg bg-white/10 backdrop-blur-sm border border-white/20 p-8">
-            <p className="text-white/60 text-sm uppercase tracking-wider font-medium">
-              Every course
+      <section className="relative py-24 bg-botanical text-white overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(231,93,124,0.08)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(232,169,79,0.06)_0%,transparent_50%)]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative">
+          <FadeIn>
+            <p className="text-sm font-medium text-bloom-rose tracking-wider uppercase mb-3">Pricing</p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl">
+              Simple, honest pricing
+            </h2>
+            <p className="mt-4 text-white/60 text-lg max-w-xl mx-auto">
+              No subscriptions. No hidden fees. One payment, lifetime access.
             </p>
-            <OfferPriceHero />
-            <p className="text-white/60 mt-2 text-sm">
-              GST inclusive · Lifetime access
-            </p>
-            <ul className="mt-6 space-y-3 text-left text-sm">
-              {[
-                "All video lessons + transcripts",
-                "AI learning assistant (Bloom AI)",
-                "Interactive quizzes & reflections",
-                "Downloadable workbooks",
-                "Community discussions",
-                "Lifetime access, learn at your pace",
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="text-bloom-rose mt-0.5">✓</span>
-                  <span className="text-white/90">{item}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/courses" className="block mt-8">
-              <Button size="lg" className="w-full text-base">
-                Browse Courses
-              </Button>
-            </Link>
-          </div>
+          </FadeIn>
+          <FadeIn delay={200}>
+            <div className="mt-12 max-w-md mx-auto relative">
+              <div className="absolute -inset-[1px] rounded-bloom-lg bg-gradient-to-b from-white/20 to-white/5" />
+              <div className="relative rounded-bloom-lg bg-white/[0.08] backdrop-blur-sm p-10">
+                <p className="text-white/50 text-sm uppercase tracking-wider font-medium">
+                  Every course
+                </p>
+                <OfferPriceHero />
+                <p className="text-white/50 mt-2 text-sm">
+                  GST inclusive · Lifetime access
+                </p>
+                <ul className="mt-8 space-y-4 text-left text-sm">
+                  {[
+                    "All video lessons + transcripts",
+                    "AI learning assistant (Bloom AI)",
+                    "Interactive quizzes & reflections",
+                    "Downloadable workbooks",
+                    "Community discussions",
+                    "Lifetime access, learn at your pace",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <CheckCircle2 className="size-4 text-bloom-rose mt-0.5 shrink-0" />
+                      <span className="text-white/85">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/courses" className="block mt-10">
+                  <Button size="lg" className="w-full text-base">
+                    Browse Courses
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-20 bg-ivory">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-3xl sm:text-4xl text-botanical text-center mb-12">
-            Frequently asked questions
-          </h2>
-          <div className="space-y-4">
+      <section className="relative py-24 bg-ivory overflow-hidden">
+        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-sage/[0.04] blur-3xl translate-x-1/3 translate-y-1/4" />
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 relative">
+          <FadeIn className="text-center mb-14">
+            <p className="text-sm font-medium text-sage tracking-wider uppercase mb-3">FAQ</p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-botanical">
+              Frequently asked questions
+            </h2>
+          </FadeIn>
+          <div className="space-y-3">
             {[
               {
                 q: "How long do I have access to a course?",
@@ -307,46 +354,45 @@ export default async function HomePage() {
                 a: "No. Bloom courses are educational, not therapeutic. They're designed by relationship experts, but if you're in crisis, we always recommend working with a licensed professional.",
               },
             ].map((faq, i) => (
-              <details
-                key={i}
-                className="group rounded-bloom-sm bg-white border border-border overflow-hidden"
-              >
-                <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-botanical hover:bg-muted/50 transition-colors">
-                  {faq.q}
-                  <ChevronRight className="size-4 text-muted-foreground group-open:rotate-90 transition-transform" />
-                </summary>
-                <p className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
-                  {faq.a}
-                </p>
-              </details>
+              <FadeIn key={i} delay={i * 80}>
+                <details className="group rounded-bloom bg-white border border-border/70 overflow-hidden shadow-bloom-sm">
+                  <summary className="flex items-center justify-between px-6 py-5 cursor-pointer text-[15px] font-medium text-botanical hover:text-bloom-rose transition-colors">
+                    {faq.q}
+                    <ChevronRight className="size-4 text-muted-foreground group-open:rotate-90 transition-transform duration-200 shrink-0 ml-4" />
+                  </summary>
+                  <p className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed">
+                    {faq.a}
+                  </p>
+                </details>
+              </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-botanical text-white/70 py-12">
+      <footer className="bg-botanical text-white/70 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-3">
               <BloomIcon light />
-              <span className="font-display text-lg text-white">Bloom</span>
+              <span className="font-display text-xl text-white">Bloom</span>
             </div>
-            <div className="flex items-center gap-6 text-sm">
-              <Link href="/courses" className="hover:text-white transition-colors">
+            <div className="flex items-center gap-8 text-sm">
+              <Link href="/courses" className="hover:text-white transition-colors duration-200">
                 Courses
               </Link>
-              <Link href="/login" className="hover:text-white transition-colors">
+              <Link href="/login" className="hover:text-white transition-colors duration-200">
                 Log in
               </Link>
-              <Link href="/signup" className="hover:text-white transition-colors">
+              <Link href="/signup" className="hover:text-white transition-colors duration-200">
                 Sign up
               </Link>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-white/10 text-center text-xs">
-            <p>© {new Date().getFullYear()} Bloom. All rights reserved.</p>
-            <p className="mt-1">Made with love in India.</p>
+          <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <p>&copy; {new Date().getFullYear()} Bloom. All rights reserved.</p>
+            <p className="text-white/40">Made with love in India.</p>
           </div>
         </div>
       </footer>
