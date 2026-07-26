@@ -106,14 +106,19 @@ export function BloomAnimation() {
       }
 
       // ── Centering offset: compensate for invisible text so visible content stays centered ──
-      const bloomW = bloomRef.current?.offsetWidth ?? 0;
-      const ingW = ingRef.current?.offsetWidth ?? 0;
-      const gap = 12;
-      const fullOffset = (gap + bloomW + ingW) / 2;
-      const bloomOnlyOffset = ingW / 2;
-      const bloomAppearT = easeInOut(clamp01((p - 0.36) / 0.10));
-      const ingAppearT = easeInOut(clamp01((p - 0.45) / 0.05));
-      const offsetX = mix(fullOffset, mix(bloomOnlyOffset, 0, ingAppearT), bloomAppearT);
+      // On mobile (vertical layout), no horizontal offset needed
+      const isMobile = window.innerWidth < 640;
+      let offsetX = 0;
+      if (!isMobile) {
+        const bloomW = bloomRef.current?.offsetWidth ?? 0;
+        const ingW = ingRef.current?.offsetWidth ?? 0;
+        const gap = 12;
+        const fullOffset = (gap + bloomW + ingW) / 2;
+        const bloomOnlyOffset = ingW / 2;
+        const bloomAppearT = easeInOut(clamp01((p - 0.36) / 0.10));
+        const ingAppearT = easeInOut(clamp01((p - 0.45) / 0.05));
+        offsetX = mix(fullOffset, mix(bloomOnlyOffset, 0, ingAppearT), bloomAppearT);
+      }
 
       // ── Phase 3: "ing" (0.45 → 0.50 in, 0.78 → 0.81 out) ──
       const ingIn = easeOut(clamp01((p - 0.45) / 0.05));
@@ -206,7 +211,7 @@ export function BloomAnimation() {
           style={{ background: 'radial-gradient(circle, rgba(231,93,124,0.10) 0%, transparent 68%)' }}
         />
 
-        <div ref={stageRef} className="flex items-center gap-3 relative z-10">
+        <div ref={stageRef} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 relative z-10">
           <svg
             ref={flowerRef}
             viewBox="0 0 120 120"
@@ -230,23 +235,25 @@ export function BloomAnimation() {
             </g>
           </svg>
 
-          <div className="flex items-baseline">
-            <span
-              ref={bloomRef}
-              className="font-display text-2xl sm:text-3xl lg:text-5xl text-botanical font-semibold tracking-tight opacity-0"
-            >
-              Bloom
-            </span>
-            <span
-              ref={ingRef}
-              className="font-display text-2xl sm:text-3xl lg:text-5xl font-semibold tracking-tight opacity-0 invisible"
-              style={{ color: '#9C9890' }}
-            >
-              ing
-            </span>
+          <div className="flex flex-col sm:flex-row items-center sm:items-baseline">
+            <div className="flex items-baseline">
+              <span
+                ref={bloomRef}
+                className="font-display text-2xl sm:text-3xl lg:text-5xl text-botanical font-semibold tracking-tight opacity-0"
+              >
+                Bloom
+              </span>
+              <span
+                ref={ingRef}
+                className="font-display text-2xl sm:text-3xl lg:text-5xl font-semibold tracking-tight opacity-0 invisible"
+                style={{ color: '#9C9890' }}
+              >
+                ing
+              </span>
+            </div>
             <span
               ref={suffixRef}
-              className="font-display text-xl sm:text-2xl lg:text-4xl font-medium ml-4 opacity-0 invisible"
+              className="font-display text-lg sm:text-2xl lg:text-4xl font-medium sm:ml-4 mt-1 sm:mt-0 opacity-0 invisible"
               style={{ color: '#9C9890' }}
             />
           </div>

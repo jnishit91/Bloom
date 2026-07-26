@@ -19,6 +19,7 @@ import { ORIGINAL_PRICE, OFFER_PRICE } from "@/lib/offer";
 import { TestimonialTicker } from "@/components/landing/testimonial-ticker";
 import { BloomAnimation } from "@/components/landing/bloom-animation";
 import { FadeIn } from "@/components/landing/fade-in";
+import { LandingMobileNav } from "@/components/landing/landing-mobile-nav";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -42,7 +43,7 @@ export default async function HomePage() {
               <span className="font-display text-xl text-botanical">Bloom</span>
             </span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3">
             <Link href="/login">
               <Button variant="ghost" size="sm">Log in</Button>
             </Link>
@@ -50,6 +51,7 @@ export default async function HomePage() {
               <Button size="sm">Get Started</Button>
             </Link>
           </div>
+          <LandingMobileNav />
         </div>
       </header>
 
