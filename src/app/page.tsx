@@ -14,8 +14,6 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
-import { OfferPriceInline, OfferPriceHero } from "@/components/commerce/offer-price";
-import { ORIGINAL_PRICE, OFFER_PRICE } from "@/lib/offer";
 import { TestimonialTicker } from "@/components/landing/testimonial-ticker";
 import { BloomAnimation } from "@/components/landing/bloom-animation";
 import { FadeIn } from "@/components/landing/fade-in";
@@ -86,8 +84,7 @@ export default async function HomePage() {
               </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground opacity-0 animate-fade-in-up" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
-              <span className="line-through text-muted-foreground/70">₹{ORIGINAL_PRICE.toLocaleString("en-IN")}</span>{" "}
-              <span className="font-semibold">₹{OFFER_PRICE.toLocaleString("en-IN")}</span> · Lifetime access · AI-powered learning
+              Lifetime access · AI-powered learning
             </p>
           </div>
         </div>
@@ -142,11 +139,10 @@ export default async function HomePage() {
                           {course.subtitle}
                         </p>
                       )}
-                      <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                      <div className="pt-2 border-t border-border/50">
                         <span className="text-sm text-muted-foreground">
                           {course.total_weeks} weeks · {course.total_lessons} lessons
                         </span>
-                        <OfferPriceInline />
                       </div>
                     </div>
                   </Link>
@@ -277,49 +273,40 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(231,93,124,0.08)_0%,transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(232,169,79,0.06)_0%,transparent_50%)]" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative">
-          <FadeIn>
-            <p className="text-sm font-medium text-bloom-rose tracking-wider uppercase mb-3">Pricing</p>
+          <div>
+            <p className="text-sm font-medium text-bloom-rose tracking-wider uppercase mb-3">What you get</p>
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl">
-              Simple, honest pricing
+              Everything included
             </h2>
             <p className="mt-4 text-white/60 text-lg max-w-xl mx-auto">
               No subscriptions. No hidden fees. One payment, lifetime access.
             </p>
-          </FadeIn>
-          <FadeIn delay={200}>
-            <div className="mt-12 max-w-md mx-auto relative">
-              <div className="absolute -inset-[1px] rounded-bloom-lg bg-gradient-to-b from-white/20 to-white/5" />
-              <div className="relative rounded-bloom-lg bg-white/[0.08] backdrop-blur-sm p-10">
-                <p className="text-white/50 text-sm uppercase tracking-wider font-medium">
-                  Every course
-                </p>
-                <OfferPriceHero />
-                <p className="text-white/50 mt-2 text-sm">
-                  GST inclusive · Lifetime access
-                </p>
-                <ul className="mt-8 space-y-4 text-left text-sm">
-                  {[
-                    "All video lessons + transcripts",
-                    "AI learning assistant (Bloom AI)",
-                    "Interactive quizzes & reflections",
-                    "Downloadable workbooks",
-                    "Community discussions",
-                    "Lifetime access, learn at your pace",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <CheckCircle2 className="size-4 text-bloom-rose mt-0.5 shrink-0" />
-                      <span className="text-white/85">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/courses" className="block mt-10">
-                  <Button size="lg" className="w-full text-base">
-                    Browse Courses
-                  </Button>
-                </Link>
-              </div>
+          </div>
+          <div className="mt-12 max-w-md mx-auto relative">
+            <div className="absolute -inset-[1px] rounded-bloom-lg bg-gradient-to-b from-white/20 to-white/5" />
+            <div className="relative rounded-bloom-lg bg-white/[0.08] backdrop-blur-sm p-10">
+              <ul className="space-y-4 text-left text-sm">
+                {[
+                  "All video lessons + transcripts",
+                  "AI learning assistant (Bloom AI)",
+                  "Interactive quizzes & reflections",
+                  "Downloadable workbooks",
+                  "Community discussions",
+                  "Lifetime access, learn at your pace",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="size-4 text-bloom-rose mt-0.5 shrink-0" />
+                    <span className="text-white/85">{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/courses" className="block mt-10">
+                <Button size="lg" className="w-full text-base">
+                  Browse Courses
+                </Button>
+              </Link>
             </div>
-          </FadeIn>
+          </div>
         </div>
       </section>
 
