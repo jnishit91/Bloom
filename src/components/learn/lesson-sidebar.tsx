@@ -262,7 +262,7 @@ function SidebarContent({
                         key={lesson.id}
                         href={`/learn/${courseSlug}/${lesson.id}`}
                         onClick={onLessonClick}
-                        className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors ${
+                        className={`flex items-center gap-3 px-4 py-3 active:bg-muted/50 transition-colors ${
                           isCurrent ? "bg-bloom-rose/5 border-l-2 border-bloom-rose" : ""
                         }`}
                       >

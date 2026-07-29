@@ -221,7 +221,7 @@ export default async function CourseSalesPage({ params }: PageProps) {
                 className="group rounded-bloom-sm border border-border overflow-hidden bg-ivory/50"
                 open
               >
-                <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                <summary className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <ChevronRight className="size-4 text-muted-foreground group-open:rotate-90 transition-transform" />
                     <h3 className="text-sm font-semibold text-botanical">
@@ -238,7 +238,7 @@ export default async function CourseSalesPage({ params }: PageProps) {
                   {mod.lessons.map((lesson) => (
                     <div
                       key={lesson.id}
-                      className="flex items-center justify-between px-5 py-3 hover:bg-white/80 transition-colors"
+                      className="flex items-center justify-between px-5 py-3 active:bg-white/80 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         {lesson.is_free_preview ? (
