@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Sparkles, BookOpen, HelpCircle, MessageCircle } from "lucide-react";
+import { Sparkles, BookOpen, HelpCircle, MessageCircle, ArrowRight } from "lucide-react";
 import { useAi } from "@/components/ai/ai-provider";
 
 interface AiBarProps {
@@ -46,8 +46,14 @@ export function AiBar({
           name="ai-input"
           type="text"
           placeholder="Ask Bloom AI about this lesson…"
-          className="w-full h-10 rounded-xl border border-border bg-ivory pl-10 pr-4 text-sm text-botanical placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-bloom-rose/30 focus:border-bloom-rose"
+          className="w-full h-10 rounded-xl border border-border bg-ivory pl-10 pr-12 text-sm text-botanical placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-bloom-rose/30 focus:border-bloom-rose"
         />
+        <button
+          type="submit"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-bloom-rose flex items-center justify-center hover:bg-bloom-rose-dark active:scale-90 transition-all cursor-pointer"
+        >
+          <ArrowRight className="size-3.5 text-white" />
+        </button>
       </form>
       <div className="flex items-center gap-2">
         <PillButton
