@@ -50,9 +50,9 @@ export function AiBar({
         />
         <button
           type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-bloom-rose flex items-center justify-center hover:bg-bloom-rose-dark active:scale-90 transition-all cursor-pointer"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-bloom-rose flex items-center justify-center hover:bg-bloom-rose-dark active:scale-90 transition-all cursor-pointer"
         >
-          <ArrowRight className="size-3.5 text-white" />
+          <ArrowRight className="size-3 text-white" />
         </button>
       </form>
       <div className="flex items-center gap-2">
