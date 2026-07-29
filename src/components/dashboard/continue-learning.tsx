@@ -39,7 +39,7 @@ function CourseCard({ course }: { course: CourseWithProgress }) {
   return (
     <Link
       href={resumeHref}
-      className="group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom transition-all duration-200"
+      className="group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom active:scale-[0.97] transition-all duration-200"
     >
       {/* Cover art */}
       <div className="relative aspect-[16/9] overflow-hidden">
