@@ -117,7 +117,7 @@ export default async function HomePage() {
                 <FadeIn key={course.id} delay={i * 150}>
                   <Link
                     href={`/courses/${course.slug}`}
-                    className="group block rounded-bloom-lg bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom-lg hover:-translate-y-1 transition-all duration-300"
+                    className="group block rounded-bloom-lg bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom-lg hover:-translate-y-1 active:scale-[0.97] transition-all duration-300"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden">
                       {course.cover_image_url ? (

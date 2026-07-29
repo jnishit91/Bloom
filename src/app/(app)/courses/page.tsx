@@ -39,7 +39,7 @@ export default async function CoursesPage() {
               <Link
                 key={course.id}
                 href={isDraft ? "#" : `/courses/${course.slug}`}
-                className={`group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom transition-all duration-200 ${isDraft ? "opacity-75 pointer-events-none" : ""}`}
+                className={`group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom active:scale-[0.97] transition-all duration-200 ${isDraft ? "opacity-75 pointer-events-none" : ""}`}
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   {course.cover_image_url ? (

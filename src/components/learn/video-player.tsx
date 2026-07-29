@@ -243,23 +243,23 @@ export function VideoPlayer({
               <button onClick={() => skip(15)} className="hover:text-bloom-rose transition-colors cursor-pointer">
                 <RotateCw className="size-4" />
               </button>
-              <span className="text-xs text-white/70 ml-1">
+              <span className="hidden landscape:inline text-xs text-white/70 ml-1">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={cycleSpeed}
-                className="text-xs px-2 py-0.5 rounded bg-white/20 hover:bg-white/30 transition-colors cursor-pointer"
+                className="hidden landscape:inline-flex text-xs px-2 py-0.5 rounded bg-white/20 hover:bg-white/30 transition-colors cursor-pointer"
               >
                 {speed}x
               </button>
-              <button onClick={() => setMuted(!muted)} className="hover:text-bloom-rose transition-colors cursor-pointer">
+              <button onClick={() => setMuted(!muted)} className="hidden landscape:inline-flex hover:text-bloom-rose transition-colors cursor-pointer">
                 {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
               </button>
               <button
                 onClick={() => setCaptionsOn(!captionsOn)}
-                className={`hover:text-bloom-rose transition-colors cursor-pointer ${captionsOn ? "text-bloom-rose" : ""}`}
+                className={`hidden landscape:inline-flex hover:text-bloom-rose transition-colors cursor-pointer ${captionsOn ? "text-bloom-rose" : ""}`}
               >
                 <Captions className="size-4" />
               </button>

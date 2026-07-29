@@ -81,7 +81,7 @@ function CatalogCard({ course }: { course: CatalogCourse }) {
   return (
     <Link
       href={isDraft ? "#" : `/courses/${course.slug}`}
-      className={`group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom transition-all duration-200 ${
+      className={`group rounded-bloom bg-white border border-border overflow-hidden shadow-bloom-sm hover:shadow-bloom active:scale-[0.97] transition-all duration-200 ${
         isDraft ? "opacity-70 pointer-events-none" : ""
       }`}
     >

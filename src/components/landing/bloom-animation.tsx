@@ -32,7 +32,6 @@ export function BloomAnimation() {
   const bloomRef = useRef<HTMLSpanElement>(null);
   const ingRef = useRef<HTMLSpanElement>(null);
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const navCacheRef = useRef<{ cx: number; cy: number; h: number } | null>(null);
 
   const getMax = useCallback(() => {
     if (typeof window === 'undefined') return 320;
@@ -144,50 +143,18 @@ export function BloomAnimation() {
         el.style.visibility = op < 0.01 ? 'hidden' : 'visible';
       }
 
-      // ── Phase 4: Logo moves to nav (0.89 → 0.96) ──
-      const navT = easeInOut(clamp01((p - 0.89) / 0.07));
-      let tx = offsetX;
-      let ty = 0;
-      let sc = 1;
-
-      if (navT > 0 && stageRef.current) {
-        if (!navCacheRef.current) {
-          const prev = stageRef.current.style.transform;
-          stageRef.current.style.transform = 'none';
-          const sr = stageRef.current.getBoundingClientRect();
-          stageRef.current.style.transform = prev;
-          navCacheRef.current = { cx: sr.left + sr.width / 2, cy: sr.top + sr.height / 2, h: sr.height };
-        }
-        const navLogo = document.getElementById('nav-bloom-logo');
-        if (navLogo && navCacheRef.current) {
-          const nr = navLogo.getBoundingClientRect();
-          const targetTx = (nr.left + nr.width / 2) - navCacheRef.current.cx;
-          const targetTy = (nr.top + nr.height / 2) - navCacheRef.current.cy;
-          const targetSc = nr.height / Math.max(1, navCacheRef.current.h);
-          tx = mix(offsetX, targetTx, navT);
-          ty = mix(0, targetTy, navT);
-          sc = mix(1, targetSc, navT);
-        }
-      }
-      if (navT <= 0) navCacheRef.current = null;
-
-      // Boost z-index above nav (z-50) during Phase 4
-      if (wrapperRef.current) {
-        wrapperRef.current.style.zIndex = navT > 0 ? '60' : '';
-      }
-
-      // ── Phase 5: Fade out (0.97 → 1.0) ──
-      const fadeOp = 1 - easeOut(clamp01((p - 0.97) / 0.03));
+      // ── Fade out in place (0.89 → 0.95) ──
+      const fadeOp = 1 - easeOut(clamp01((p - 0.89) / 0.06));
 
       // ── Apply combined transform ──
       if (stageRef.current) {
-        stageRef.current.style.transform = `translate(${tx}px, ${ty}px) scale(${sc})`;
+        stageRef.current.style.transform = `translateX(${offsetX}px)`;
         stageRef.current.style.opacity = String(fadeOp);
       }
     };
 
     const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    const onResize = () => { MAX = getMax(); navCacheRef.current = null; };
+    const onResize = () => { MAX = getMax(); };
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
     update();
@@ -244,18 +211,18 @@ export function BloomAnimation() {
                 ing
               </span>
             </div>
-            <span className="relative sm:ml-4 mt-1 sm:mt-0">
+            <div className="relative sm:ml-4 mt-1 sm:mt-0">
               {WORDS.map(([,,,, word], i) => (
                 <span
                   key={word}
                   ref={(el) => { wordRefs.current[i] = el; }}
-                  className="font-display text-lg sm:text-2xl lg:text-4xl font-medium opacity-0 invisible absolute left-0 top-0 whitespace-nowrap first:relative"
+                  className="font-display text-lg sm:text-2xl lg:text-4xl font-medium opacity-0 invisible absolute inset-x-0 text-center sm:right-auto sm:text-left top-0 whitespace-nowrap first:relative"
                   style={{ color: '#9C9890' }}
                 >
                   {word}
                 </span>
               ))}
-            </span>
+            </div>
           </div>
         </div>
         </div>
