@@ -138,9 +138,14 @@ export function VideoPlayer({
   }
 
   function toggleFullscreen() {
-    if (!containerRef.current) return;
-    if (document.fullscreenElement) document.exitFullscreen();
-    else containerRef.current.requestFullscreen();
+    const video = videoRef.current as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else if (containerRef.current?.requestFullscreen) {
+      containerRef.current.requestFullscreen();
+    } else if (video?.webkitEnterFullscreen) {
+      video.webkitEnterFullscreen();
+    }
   }
 
   function handleSeek(e: React.MouseEvent<HTMLDivElement>) {
